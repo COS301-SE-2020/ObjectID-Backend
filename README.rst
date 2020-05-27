@@ -1,7 +1,7 @@
 ObjectID
 ========
 
-Behold My Awesome Project!
+Vehicle Identification projet
 
 .. image:: https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg
      :target: https://github.com/pydanny/cookiecutter-django/
