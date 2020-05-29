@@ -2,9 +2,30 @@ from django.http import HttpResponse, QueryDict
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions
+from rest_framework import permissions, exceptions
 
 from tools.serializers import APISerializer
+
+def validate_paramaters(params, checklist, *args, **kwargs):
+    for item in checklist:
+        if item not in checklist:
+            return False
+    return True
+
+
+def validate_params(test_set):
+    def decorator(func):
+        @wraps(func)
+        def wrapped_func(self, request, params=None, *args, **kwargs):
+            if params in None:
+                params = {}
+            valid = validate_paramaters(params, test_set)
+            if not valid:
+                raise exceptions.ValidationError('Missing %s' % test_set)
+            return func(self, request, params, *args, **kwargs)
+        return wrapped_func
+    return decorator
+
 
 class ActionAPI(APIView):
     """
