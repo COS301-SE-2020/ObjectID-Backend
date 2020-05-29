@@ -15,3 +15,11 @@ class VehicleBase(ActionAPI):
         Simply a way of getting all the information on a specified vehicle
         """
         pass
+
+    @validate_params(['licence_plate', ''])
+    def add_vehicle(self, request, params=None, *args, **kwargs):
+        """
+        Used to add vehicles
+        """
+        pass
+    
