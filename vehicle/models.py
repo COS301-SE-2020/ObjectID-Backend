@@ -7,6 +7,7 @@ class Vehicle(models.Model):
     make = models.CharField(max_length=64)
     model = models.CharField(max_length=64)
     color = models.CharField(max_length=32) # TODO: Consider making this a Foreign key for set values?
+    
 
     def __str__(self):
         return "{}: {} {}".format(self.model, self.licence_plate, self.color)        
