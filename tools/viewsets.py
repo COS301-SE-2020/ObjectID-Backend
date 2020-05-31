@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.http import HttpResponse, QueryDict
 
 from rest_framework.views import APIView

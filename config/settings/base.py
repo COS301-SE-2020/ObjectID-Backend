@@ -42,7 +42,14 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db("DATABASE_URL", default="postgres:///objectid")
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'objectid',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
@@ -78,6 +85,8 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "objectid.users.apps.UsersConfig",
     # Your stuff: custom apps go here
+    "vehicle.apps.VehicleConfig",
+    "tracking.apps.TrackingConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
