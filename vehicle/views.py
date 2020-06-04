@@ -85,3 +85,39 @@ class VehicleBase(ActionAPI):
             "payload": serializer.errors
         }
         return data
+
+
+    def search_and(self, request, params=None, *args, **kwargs):
+        """ 
+        Used to search for vehicles by various paramaters
+        """
+
+        vehicles = []
+
+        queryset = Vehicle.objects.all()
+
+        license_plate = params['filters']['license_platee']
+        make = params['filters']['make']
+        model = params['filters']['model']
+        color = params['filters']['color']
+        saps_flagged = params['filters']['saps_flagged']
+        license_plate_duplicate = params['filters']['license_plate_duplicate']
+
+        if license_plate:
+            queryset.filter(license_plate=license_plate)
+        if make:
+            queryset.filter(make=make)
+        if model:
+            queryset.filter(model=model)
+        if color:
+            queryset.filter(color=color)
+        if saps_flagged:
+            queryset.filter(saps_flagged=saps_flagged)
+        if license_plate_duplicate:
+            queryset.filter(license_plate_duplicate=license_plate_duplicate)
+
+        vehicles.append(list(queryset))
+
+        serializer = VehicleSerializer(vehicles, many=True)
+
+        return serializer.data
