@@ -12,7 +12,7 @@ class Vehicle(models.Model):
     
 
     def __str__(self):
-        return "{}: {} {}".format(self.model, self.licence_plate, self.color)
+        return "{}: {} {}".format(self.model, self.license_plate, self.color)
 
 class DamageLocation(models.Model):
     location = models.CharField(max_length=128)
@@ -32,4 +32,4 @@ class Damage(models.Model):
     type = models.ForeignKey(DamageType, on_delete=models.CASCADE, related_name='damage')
 
     def __str__(self):
-        return "{}: {} at {}".format(self.vehicle.licence_plate, self.type.description, self.location.location)
+        return "{}: {} at {}".format(self.vehicle.license_plate, self.type.description, self.location.location)
