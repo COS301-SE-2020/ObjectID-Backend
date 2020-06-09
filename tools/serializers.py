@@ -10,7 +10,7 @@ class APISerializer(serializers.ModelSerializer):
 
         if isinstance(instance, dict):
             if 'success' in instance:
-                success = instance.pop('sucess')
+                success = instance.pop('success')
             if 'payload' in instance:
                 payload = instance.pop('payload')
             if 'reason' in instance:

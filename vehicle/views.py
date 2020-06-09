@@ -8,8 +8,8 @@ from tools.viewsets import ActionAPI, validate_params
 
 
 class VehicleBase(ActionAPI):
-
-    permission_classes = [permissions.IsAuthenticated, ]
+    # TODO: Place this back in when login is added
+    # permission_classes = [permissions.IsAuthenticated, ] 
 
     @validate_params(['license_plate'])
     def get_vehicle(self, request, params=None, *args, **kwargs):
@@ -92,32 +92,36 @@ class VehicleBase(ActionAPI):
         Used to search for vehicles by various paramaters
         """
 
-        vehicles = []
+        queryset = Vehicle.objects.none()
 
-        queryset = Vehicle.objects.all()
+        filters = params.get('filters', {})
 
-        license_plate = params['filters']['license_platee']
-        make = params['filters']['make']
-        model = params['filters']['model']
-        color = params['filters']['color']
-        saps_flagged = params['filters']['saps_flagged']
-        license_plate_duplicate = params['filters']['license_plate_duplicate']
+        license_plate = filters.get('license_plate', None)
+        make = filters.get('make', None)
+        model = filters.get('model', None)
+        color = filters.get('color', None)
+        saps_flagged = filters.get('saps_flagged', None)
+        license_plate_duplicate = filters.get('license_plate_duplicate', None)
 
         if license_plate:
-            queryset.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
         if make:
-            queryset.filter(make=make)
+            queryset |= Vehicle.objects.filter(make=make)
         if model:
-            queryset.filter(model=model)
+            queryset |= Vehicle.objects.filter(model=model)
         if color:
-            queryset.filter(color=color)
+            queryset |= Vehicle.objects.filter(color=color)
         if saps_flagged:
-            queryset.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
         if license_plate_duplicate:
-            queryset.filter(license_plate_duplicate=license_plate_duplicate)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
 
-        vehicles.append(list(queryset))
+        if queryset.count() == 0:
+            return {
+                "success": False,
+                "message": "No data matching query"
+            }
 
-        serializer = VehicleSerializer(vehicles, many=True)
+        serializer = VehicleSerializer(queryset, many=True)
 
         return serializer.data

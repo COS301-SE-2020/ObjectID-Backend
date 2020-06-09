@@ -6,8 +6,8 @@ class UsersConfig(AppConfig):
     name = "objectid.users"
     verbose_name = _("Users")
 
-    def ready(self):
-        try:
-            import objectid.users.signals  # noqa F401
-        except ImportError:
-            pass
+    # def ready(self):
+    #     try:
+    #         import objectid.users.signals  # noqa F401
+    #     except ImportError:
+    #         pass

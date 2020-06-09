@@ -19,7 +19,7 @@ def validate_params(test_set):
     def decorator(func):
         @wraps(func)
         def wrapped_func(self, request, params=None, *args, **kwargs):
-            if params in None:
+            if params is None:
                 params = {}
             valid = validate_paramaters(params, test_set)
             if not valid:
@@ -36,7 +36,7 @@ class ActionAPI(APIView):
     of requst you send it will go through
     """
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     _last_action = None
 
