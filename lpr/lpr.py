@@ -3,7 +3,7 @@ import sys
 
 
 def check_image(path):
-    alpr = Alpr("us", "/mnt/f/objectenv/lib/python3.8/openalpr/openalpr.conf", "/mnt/f/objectenv/lib/python3.8/openalpr/runtime_data")
+    alpr = Alpr("us", "/etc/openalpr/openalpr.conf", "/usr/share/openalpr/runtime_data")
     if not alpr.is_loaded():
         print("Error loading OpenALPR")
         sys.exit(1)
