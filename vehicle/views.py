@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from rest_framework import permissions
 
-from .models import Vehicle
+from .models import Vehicle, ImageSpace
 from .serializers import VehicleSerializer
 from tools.viewsets import ActionAPI, validate_params
 
@@ -125,3 +125,15 @@ class VehicleBase(ActionAPI):
         serializer = VehicleSerializer(queryset, many=True)
 
         return serializer.data
+
+    def file_recognize(self, request, params=None, *args, **kwargs):
+        """
+        Used to upload a file and run it through OpenALPR and save an instance of a vehicle to that image
+        """
+
+        temp = ImageSpace(image=params['file'])
+        temp.save()
+
+        return {
+            "reason": "wtf am I doing"
+        }

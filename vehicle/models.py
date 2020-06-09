@@ -33,3 +33,7 @@ class Damage(models.Model):
 
     def __str__(self):
         return "{}: {} at {}".format(self.vehicle.license_plate, self.type.description, self.location.location)
+
+class ImageSpace(models.Model):
+    image = models.ImageField(upload_to='vehicles/%Y/%m/%d/')
+    vehicle = models.ForeignKey(Vehicle, null=True, blank=True, on_delete=models.CASCADE)
