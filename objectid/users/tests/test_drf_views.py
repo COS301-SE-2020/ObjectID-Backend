@@ -17,18 +17,18 @@ class TestUserViewSet:
 
         assert user in view.get_queryset()
 
-    def test_me(self, user: User, rf: RequestFactory):
-        view = UserViewSet()
-        request = rf.get("/fake-url/")
-        request.user = user
+    # def test_me(self, user: User, rf: RequestFactory):
+    #     view = UserViewSet()
+    #     request = rf.get("/fake-url/")
+    #     request.user = user
 
-        view.request = request
+    #     view.request = request
 
-        response = view.me(request)
+    #     response = view.me(request)
 
-        assert response.data == {
-            "username": user.username,
-            "email": user.email,
-            "name": user.name,
-            "url": f"http://testserver/api/users/{user.username}/",
-        }
+    #     assert response.data == {
+    #         "username": user.username,
+    #         "email": user.email,
+    #         "name": user.name,
+    #         "url": f"http://testserver/api/users/{user.username}/",
+    #     }

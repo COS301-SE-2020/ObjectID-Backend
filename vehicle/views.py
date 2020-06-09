@@ -131,8 +131,15 @@ class VehicleBase(ActionAPI):
         Used to upload a file and run it through OpenALPR and save an instance of a vehicle to that image
         """
 
+        from openalpr.lpr import check_image
+
+
+
         temp = ImageSpace(image=params['file'])
         temp.save()
+        path = temp.image.path
+
+        check_image(path)
 
         return {
             "reason": "wtf am I doing"
