@@ -88,7 +88,7 @@ class VehicleBase(ActionAPI):
         return data
 
     @csrf_exempt
-    def search_and(self, request, params=None, *args, **kwargs):
+    def search_or(self, request, params=None, *args, **kwargs):
         """ 
         Used to search for vehicles by various paramaters
         """
