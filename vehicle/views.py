@@ -135,14 +135,39 @@ class VehicleBase(ActionAPI):
 
         from lpr.lpr import check_image
 
-
-
         temp = ImageSpace(image=params['file'])
         temp.save()
         path = temp.image.path
 
-        check_image(path)
+        result = check_image(path)
+
+        result = result.get('results', [])
+        result = result[0]
+        plate = result.get('plate', None)
+
+        if plate is not None:
+            # TODO: Implement all the 'tbi' factors as well as damage
+            data = {
+                'license_plate': plate,
+                'color': 'tbi',
+                'make' : 'tbi',
+                'model': 'tbi',
+                'saps_flagged': False,
+                'license_plate_duplicate': False,
+            }
+
+            serializer = VehicleSerializer(data=data)
+            if serializer.is_valid():
+                vehicle = serializer.save()
+                temp.vehicle = vehicle
+                temp.save()
+                return serializer.data
+            return {
+                "success": False,
+                "payload": serializer.errors
+            }
 
         return {
-            "reason": "wtf am I doing"
+            "success": False,
+            "reason": "Something went wrong with OpenALPR"
         }
