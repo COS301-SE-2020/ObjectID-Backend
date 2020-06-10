@@ -1,12 +1,13 @@
 from django.shortcuts import render
 
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions
 
 from .models import Vehicle, ImageSpace
 from .serializers import VehicleSerializer
 from tools.viewsets import ActionAPI, validate_params
 
-
+@csrf_exempt
 class VehicleBase(ActionAPI):
     # TODO: Place this back in when login is added
     # permission_classes = [permissions.IsAuthenticated, ] 
