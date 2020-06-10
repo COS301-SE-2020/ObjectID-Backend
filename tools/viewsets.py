@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.http import HttpResponse, QueryDict
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -42,11 +43,11 @@ class ActionAPI(APIView):
     _last_action = None
 
     RESPONSE_KEYS = ['user', 'action', 'token', 'subject', 'type', 'messageid']
-
+    @csrf_exempt
     def post(self, request, action, **kwargs):
         return self.get(request, action, **kwargs)
 
-
+    @csrf_exempt
     def get(self, request, action, **kwargs):
         params = self.normalize_params(request)
 
