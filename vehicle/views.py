@@ -128,6 +128,149 @@ class VehicleBase(ActionAPI):
         return serializer.data
 
     @csrf_exempt
+    def search_and(self, request, params=None, *args, **kwargs):
+        """ 
+        Used to search for vehicles by various paramaters
+        """
+        queryset = Vehicle.objects.none()
+
+        filters = params.get('filters', {})
+
+        license_plate = filters.get('license_plate', None)
+        make = filters.get('make', None)
+        model = filters.get('model', None)
+        color = filters.get('color', None)
+        saps_flagged = filters.get('saps_flagged', None)
+        license_plate_duplicate = filters.get('license_plate_duplicate', None)
+
+        if license_plate and make and model and color and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and make and model and color and saps_flagged:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+        elif license_plate and make and model and color and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and make and model and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and make and color and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and model and color and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif make and model and color and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and make and model:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+        elif license_plate and make and color:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(color=color)
+        elif license_plate and make and saps_flagged:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+        elif license_plate and make and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and model and color:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+        elif license_plate and model and saps_flagged:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+        elif license_plate and model and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and color and saps_flagged:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+        elif license_plate and color and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif license_plate and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif make and model and color:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+        elif make and model and saps_flagged:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+        elif make and model and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif make and color and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif make and color and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif make and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(make=make)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif model and color and saps_flagged:
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+        elif model and color and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif model and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(model=model)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        elif color and saps_flagged and license_plate_duplicate:
+            queryset |= Vehicle.objects.filter(color=color)
+            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+        
+        
+            
+    @csrf_exempt
     def file_recognize(self, request, params=None, *args, **kwargs):
         """
         Used to upload a file and run it through OpenALPR and save an instance of a vehicle to that image
