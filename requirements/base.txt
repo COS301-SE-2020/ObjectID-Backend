@@ -21,3 +21,4 @@ djangorestframework==3.11.0  # https://github.com/encode/django-rest-framework
 # AI STUFF
 openalpr
 numpy
+django-cors-headers
