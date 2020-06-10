@@ -7,11 +7,11 @@ from .models import Vehicle, ImageSpace
 from .serializers import VehicleSerializer
 from tools.viewsets import ActionAPI, validate_params
 
-@csrf_exempt
+
 class VehicleBase(ActionAPI):
     # TODO: Place this back in when login is added
     # permission_classes = [permissions.IsAuthenticated, ] 
-
+    @csrf_exempt
     @validate_params(['license_plate'])
     def get_vehicle(self, request, params=None, *args, **kwargs):
         """
@@ -28,7 +28,7 @@ class VehicleBase(ActionAPI):
         serializer = VehicleSerializer(vehicle)
         return serializer.data
         
-
+    @csrf_exempt
     @validate_params(['license_plate', 'color', 'make', 'model'])
     def add_vehicle_basic(self, request, params=None, *args, **kwargs):
         """
@@ -87,7 +87,7 @@ class VehicleBase(ActionAPI):
         }
         return data
 
-
+    @csrf_exempt
     def search_and(self, request, params=None, *args, **kwargs):
         """ 
         Used to search for vehicles by various paramaters
@@ -127,6 +127,7 @@ class VehicleBase(ActionAPI):
 
         return serializer.data
 
+    @csrf_exempt
     def file_recognize(self, request, params=None, *args, **kwargs):
         """
         Used to upload a file and run it through OpenALPR and save an instance of a vehicle to that image
