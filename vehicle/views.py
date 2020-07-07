@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render
 
 from django.views.decorators.csrf import csrf_exempt
@@ -6,6 +8,7 @@ from rest_framework import permissions, filters
 
 from .models import Vehicle, ImageSpace
 from .serializers import VehicleSerializer
+from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
 
@@ -38,8 +41,6 @@ class VehicleBase(ActionAPI):
 
         # TODO: Implement SAPS flag checking
 
-        # TODO: Implement sending warnings on duplicates
-
         vehicle = Vehicle.objects.filter(license_plate=params['license_plate'])
 
         if vehicle.count() > 0:
@@ -61,14 +62,38 @@ class VehicleBase(ActionAPI):
                 serializer = VehicleSerializer(data=data)
                 if serializer.is_valid():
                     serializer.save()
-                    return serializer.data
+                    tracking_data = {
+                        "vehicle": serializer.instance(),
+                        "date": datetime.now(),
+                        "location": params.get("location", "No location")
+                    }
+                    tracking_serializer = TrackingSerializer(data=tracking_data)
+                    tracking_serializer.save()
+                    return {
+                        "success": True,
+                        "duplicate": True,
+                        "payload": {
+                            "vehicles": serializer.data
+                        }
+                    }
                 return serializer.errors
 
             # This vehicle is not a duplicate but already exists within the system
-            # TODO: Add tracking stuff
+            tracking_data = {
+                "vehicle": vehicle,
+                "date": datetime.now(),
+                "location": params.get("location", "No Location")
+            }
+
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            tracking_serializer.save()
+
+            return {
+                "success": True,
+                "message": "Vehicle tracked"
+            }
         
         # This vehicle is not within our system yet, add it
-
         data = {
             "license_plate": params["license_plate"],
             "make": params["make"],
@@ -81,6 +106,15 @@ class VehicleBase(ActionAPI):
         serializer = VehicleSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+
+            tracking_data = {
+                "vehicle": serializer.instance(),
+                "date": datetime.now(),
+                "location": params.get("location", "No location")
+            }
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            tracking_serializer.save()
+
             return serializer.data
         data = {
             "success": False,
