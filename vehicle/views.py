@@ -88,94 +88,98 @@ class VehicleBase(ActionAPI):
         return data
 
     @csrf_exempt
-    def search_or(self, request, params=None, *args, **kwargs):
+    @validate_params(["filters", "type"])
+    def search_advanced(self, request, params=None, *args, **kwargs):
         """ 
         Used to search for vehicles by various paramaters
         """
 
-        queryset = Vehicle.objects.none()
-
-        filters = params.get('filters', {})
-
-        license_plate = filters.get('license_plate', None)
-        make = filters.get('make', None)
-        model = filters.get('model', None)
-        color = filters.get('color', None)
-        saps_flagged = filters.get('saps_flagged', None)
-        license_plate_duplicate = filters.get('license_plate_duplicate', None)
-
-        if license_plate:
-            queryset |= Vehicle.objects.filter(license_plate=license_plate)
-        if make:
-            queryset |= Vehicle.objects.filter(make=make)
-        if model:
-            queryset |= Vehicle.objects.filter(model=model)
-        if color:
-            queryset |= Vehicle.objects.filter(color=color)
-        if saps_flagged:
-            queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
-        if license_plate_duplicate:
-            queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
-
-        if queryset.count() == 0:
-            return {
-                "success": False,
-                "message": "No data matching query"
-            }
-
-        serializer = VehicleSerializer(queryset, many=True)
-
-        return serializer.data
-
-    @csrf_exempt
-    def search_and(self, request, params=None, *args, **kwargs):
-        """ 
-        Used to search for vehicles by various paramaters
-        """
-        queryset = Vehicle.objects.all()
-
+        search_type = params.get("type", None)
         filters = params.get('filters', None)
 
-        if filter is None:
-            return {
-                "success": False,
-                "message": "Filters argument not provided"
-            }
+        if search_type == "and":
+            """AND TYPE SEARCH"""
+            queryset = Vehicle.objects.all()
 
-        license_plate = filters.get('license_plate', None)
-        make = filters.get('make', None)
-        model = filters.get('model', None)
-        color = filters.get('color', None)
-        saps_flagged = filters.get('saps_flagged', None)
-        license_plate_duplicate = filters.get('license_plate_duplicate', None)
+            if filter is None:
+                return {
+                    "success": False,
+                    "message": "Filters argument not provided"
+                }
 
-        if license_plate:
-            queryset = queryset.filter(license_plate=license_plate)
+            license_plate = filters.get('license_plate', None)
+            make = filters.get('make', None)
+            model = filters.get('model', None)
+            color = filters.get('color', None)
+            saps_flagged = filters.get('saps_flagged', None)
+            license_plate_duplicate = filters.get('license_plate_duplicate', None)
 
-        if make:
-            queryset = queryset.filter(make=make)
+            if license_plate:
+                queryset = queryset.filter(license_plate=license_plate)
 
-        if model:
-            queryset = queryset.filter(model=model)
-        
-        if color:
-            queryset = queryset.filter(color=color)
+            if make:
+                queryset = queryset.filter(make=make)
 
-        if saps_flagged:
-            queryset = queryset.filter(saps_flagged=saps_flagged)
+            if model:
+                queryset = queryset.filter(model=model)
+            
+            if color:
+                queryset = queryset.filter(color=color)
 
-        if license_plate_duplicate:
-            queryset = queryset.filter(license_plate_duplicate=license_plate_duplicate)
+            if saps_flagged:
+                queryset = queryset.filter(saps_flagged=saps_flagged)
 
-        if queryset.count() == 0:
-            return {
-                "success": False,
-                "message": "No items match this query"
-            }
+            if license_plate_duplicate:
+                queryset = queryset.filter(license_plate_duplicate=license_plate_duplicate)
 
-        serializer = VehicleSerializer(queryset, many=True)
+            if queryset.count() == 0:
+                return {
+                    "success": False,
+                    "message": "No items match this query"
+                }
 
-        return serializer.data
+            serializer = VehicleSerializer(queryset, many=True)
+
+            return serializer.data
+
+        elif search_type == "or":
+            """OR TYPE SEARCH"""
+            queryset = Vehicle.objects.none()
+
+            license_plate = filters.get('license_plate', None)
+            make = filters.get('make', None)
+            model = filters.get('model', None)
+            color = filters.get('color', None)
+            saps_flagged = filters.get('saps_flagged', None)
+            license_plate_duplicate = filters.get('license_plate_duplicate', None)
+
+            if license_plate:
+                queryset |= Vehicle.objects.filter(license_plate=license_plate)
+            if make:
+                queryset |= Vehicle.objects.filter(make=make)
+            if model:
+                queryset |= Vehicle.objects.filter(model=model)
+            if color:
+                queryset |= Vehicle.objects.filter(color=color)
+            if saps_flagged:
+                queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
+            if license_plate_duplicate:
+                queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
+
+            if queryset.count() == 0:
+                return {
+                    "success": False,
+                    "message": "No data matching query"
+                }
+
+            serializer = VehicleSerializer(queryset, many=True)
+
+            return serializer.data
+
+        return {
+            "success": False,
+            "message": "Search type is not supported"
+        }
         
     @csrf_exempt
     def file_recognize(self, request, params=None, *args, **kwargs):
