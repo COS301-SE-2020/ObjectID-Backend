@@ -1,7 +1,8 @@
 from django.shortcuts import render
 
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import permissions
+from django.db.models import Q
+from rest_framework import permissions, filters
 
 from .models import Vehicle, ImageSpace
 from .serializers import VehicleSerializer
@@ -95,7 +96,7 @@ class VehicleBase(ActionAPI):
         """
 
         search_type = params.get("type", None)
-        filters = params.get('filters', None)
+        filters_param = params.get('filters', None)
 
         if search_type == "and":
             """AND TYPE SEARCH"""
@@ -107,12 +108,12 @@ class VehicleBase(ActionAPI):
                     "message": "Filters argument not provided"
                 }
 
-            license_plate = filters.get('license_plate', None)
-            make = filters.get('make', None)
-            model = filters.get('model', None)
-            color = filters.get('color', None)
-            saps_flagged = filters.get('saps_flagged', None)
-            license_plate_duplicate = filters.get('license_plate_duplicate', None)
+            license_plate = filters_param.get('license_plate', None)
+            make = filters_param.get('make', None)
+            model = filters_param.get('model', None)
+            color = filters_param.get('color', None)
+            saps_flagged = filters_param.get('saps_flagged', None)
+            license_plate_duplicate = filters_param.get('license_plate_duplicate', None)
 
             if license_plate:
                 queryset = queryset.filter(license_plate=license_plate)
@@ -146,12 +147,12 @@ class VehicleBase(ActionAPI):
             """OR TYPE SEARCH"""
             queryset = Vehicle.objects.none()
 
-            license_plate = filters.get('license_plate', None)
-            make = filters.get('make', None)
-            model = filters.get('model', None)
-            color = filters.get('color', None)
-            saps_flagged = filters.get('saps_flagged', None)
-            license_plate_duplicate = filters.get('license_plate_duplicate', None)
+            license_plate = filters_param.get('license_plate', None)
+            make = filters_param.get('make', None)
+            model = filters_param.get('model', None)
+            color = filters_param.get('color', None)
+            saps_flagged = filters_param.get('saps_flagged', None)
+            license_plate_duplicate = filters_param.get('license_plate_duplicate', None)
 
             if license_plate:
                 queryset |= Vehicle.objects.filter(license_plate=license_plate)
@@ -180,7 +181,39 @@ class VehicleBase(ActionAPI):
             "success": False,
             "message": "Search type is not supported"
         }
-        
+    
+    @validate_params(['search'])
+    def search(self, request, params=None, *args, **kwargs):
+        """
+        Used to search the database of Vehicles by keywords
+        """
+
+        # TODO: Consider implementing multiple words?
+
+        word_match = params.get("search", None)
+
+        if word_match is None:
+            return {
+                "success": False,
+                "message": "No search words were passed through"
+            }
+
+        queryset = Vehicle.objects.filter(
+            Q(license_plate__icontains=word_match) |
+            Q(make__icontains=word_match) |
+            Q(model__icontains=word_match) |
+            Q(color__icontains=word_match)
+        )
+
+        if queryset.count() == 0:
+            return {
+                "success": False,
+                "message": "No items matching given keywords"
+            }
+
+        serializer = VehicleSerializer(queryset, many=True)
+        return serializer.data
+
     @csrf_exempt
     def file_recognize(self, request, params=None, *args, **kwargs):
         """
