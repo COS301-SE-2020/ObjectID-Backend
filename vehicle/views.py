@@ -128,6 +128,56 @@ class VehicleBase(ActionAPI):
         return serializer.data
 
     @csrf_exempt
+    def search_and(self, request, params=None, *args, **kwargs):
+        """ 
+        Used to search for vehicles by various paramaters
+        """
+        queryset = Vehicle.objects.all()
+
+        filters = params.get('filters', None)
+
+        if filter is None:
+            return {
+                "success": False,
+                "message": "Filters argument not provided"
+            }
+
+        license_plate = filters.get('license_plate', None)
+        make = filters.get('make', None)
+        model = filters.get('model', None)
+        color = filters.get('color', None)
+        saps_flagged = filters.get('saps_flagged', None)
+        license_plate_duplicate = filters.get('license_plate_duplicate', None)
+
+        if license_plate:
+            queryset = queryset.filter(license_plate=license_plate)
+
+        if make:
+            queryset = queryset.filter(make=make)
+
+        if model:
+            queryset = queryset.filter(model=model)
+        
+        if color:
+            queryset = queryset.filter(color=color)
+
+        if saps_flagged:
+            queryset = queryset.filter(saps_flagged=saps_flagged)
+
+        if license_plate_duplicate:
+            queryset = queryset.filter(license_plate_duplicate=license_plate_duplicate)
+
+        if queryset.count() == 0:
+            return {
+                "success": False,
+                "message": "No items match this query"
+            }
+
+        serializer = VehicleSerializer(queryset, many=True)
+
+        return serializer.data
+        
+    @csrf_exempt
     def file_recognize(self, request, params=None, *args, **kwargs):
         """
         Used to upload a file and run it through OpenALPR and save an instance of a vehicle to that image
