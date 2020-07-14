@@ -292,3 +292,133 @@ class VehicleBase(ActionAPI):
             "success": False,
             "reason": "Something went wrong with OpenALPR"
         }
+    
+    @validate_params(["license_plate", "make", "model", "color", "file"])
+    def camera_add_full(self, request, params=None, *args, **kwargs):
+        """
+        Used to add an image and full vehicle data from a camera into the system
+        """
+
+        vehicle = Vehicle.objects.filter(license_plate=params['license_plate'])
+        image = ImageSpace(image=params['file'])
+        image.save()
+
+        if vehicle.count() > 0:
+            vehicle = vehicle[0]
+
+            if params['make'] != vehicle.make or vehicle.model != params['model'] or vehicle.color != params['color']:
+                # This license plate is a duplicate in this case
+                vehicle.license_plate_duplicate = True
+                vehicle.save()
+                data = {
+                    "license_plate": params["license_plate"],
+                    "make": params["make"],
+                    "model": params["model"],
+                    "color": params["color"],
+                    "saps_flagged": False,
+                    "license_plate_duplicate": True
+                }
+
+                serializer = VehicleSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    tracking_data = {
+                        "vehicle": serializer.instance(),
+                        "date": datetime.now(),
+                        "location": params.get("location", "No location")
+                    }
+                    tracking_serializer = TrackingSerializer(data=tracking_data)
+                    tracking_serializer.save()
+
+                    image.vehicle = serializer.instance()
+                    image.save()
+
+                    # TODO: Implement image ID and damage saving
+
+                    return {
+                        "success": True,
+                        "duplicate": True,
+                        "payload": {
+                            "vehicles": serializer.data
+                        }
+                    }
+                return serializer.errors
+
+            # This vehicle is not a duplicate but already exists within the system
+            tracking_data = {
+                "vehicle": vehicle,
+                "date": datetime.now(),
+                "location": params.get("location", "No Location")
+            }
+
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            tracking_serializer.save()
+            image.vehicle = vehicle
+            image.save()
+
+            # TODO: Implement image ID and damage saving
+
+            return {
+                "success": True,
+                "message": "Vehicle tracked"
+            }
+        
+        # This vehicle is not within our system yet, add it
+        data = {
+            "license_plate": params["license_plate"],
+            "make": params["make"],
+            "model": params["model"],
+            "color": params["color"],
+            "saps_flagged": False, #TODO: Add this checking stuff
+            "license_plate_duplicate": False
+        }
+
+        serializer = VehicleSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+
+            tracking_data = {
+                "vehicle": serializer.instance(),
+                "date": datetime.now(),
+                "location": params.get("location", "No location")
+            }
+            tracking_serializer = TrackingSerializer(data=tracking_data)
+            tracking_serializer.save()
+
+            image.vehicle = serializer.instance()
+            image.save()
+
+            # TODO: Implement image ID and damage saving
+
+            return serializer.data
+        data = {
+            "success": False,
+            "payload": serializer.errors
+        }
+        return data
+        
+
+    def get_saps_flagged(self, request, params=None, *args, **kwargs):
+        """
+        Used to retrieve the set of vehicles that have been flagged by SAPS and saved in our system
+        """
+
+        queryset = Vehicle.objects.filter(saps_flagged=True)
+
+        serializer = VehicleSerializer(queryset, many=True)
+
+        return serializer.data
+
+
+    def get_duplicates(self, request, params=None, *args, **kwags):
+        """
+        Used to retrieve the set of vehicles that are duplicates
+        """
+
+        queryset = Vehicle.objects.filter(license_plate_duplicate=True)
+
+        serializer = VehicleSerializer(queryset, many=True)
+
+        return serializer.data
+
+        
