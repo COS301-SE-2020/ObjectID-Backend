@@ -23,8 +23,6 @@ openalpr
 numpy
 django-cors-headers
 matplotlib
-scikit-image
-scikite-learn
 ipython
 opencv-python
 opencv-contrib-python
