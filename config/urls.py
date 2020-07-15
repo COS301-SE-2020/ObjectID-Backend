@@ -24,7 +24,7 @@ urlpatterns += [
     # API base url
     path("api/", include("rest_api.urls")),
     # DRF auth token
-    path("auth-token/", obtain_auth_token),
+    path("api-auth/", obtain_auth_token),
 ]
 
 if settings.DEBUG:

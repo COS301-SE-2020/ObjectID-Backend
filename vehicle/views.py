@@ -14,7 +14,7 @@ from tools.viewsets import ActionAPI, validate_params
 
 class VehicleBase(ActionAPI):
     # TODO: Place this back in when login is added
-    # permission_classes = [permissions.IsAuthenticated, ] 
+    permission_classes = [permissions.IsAuthenticated, ] 
     @csrf_exempt
     @validate_params(['license_plate'])
     def get_vehicle(self, request, params=None, *args, **kwargs):

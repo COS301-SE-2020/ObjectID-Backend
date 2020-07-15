@@ -1,0 +1,83 @@
+******
+ALL REQUESTS REQUIRE THE AUTHORIZATION HEADER IN THE FORM:
+Authorization: Token <token>
+******
+
+/api/v1/search
+
+Expects:
+    {
+        "search": <string>
+    }
+
+Returns: 
+{
+    "success": <bool>,
+    "payload": <array of vehicles>
+}
+**Currently only accepts one keyword in the search argument**
+Future versions may contain multiple word funtionality
+
+/api/v1/search_advanced/
+
+Expects:
+{
+    "type": <"and", "or">,
+    "filters": {
+        "make": <string>
+        etc
+    }
+}
+
+Returns:
+{
+    "success": <bool>,
+    "payload": <array of vehicles>
+}
+
+/api/v1/get_vehicle
+
+Expects:
+{
+    "license_plate": <string>
+}
+
+Returns:
+{
+    "success": <bool>,
+    "payload": <array of vehicles>
+}
+
+/api/v1/get_saps_flagged
+
+Expects:
+
+Returns:
+{
+    "success": <bool>,
+    "payload": <array of vehicles>
+}
+
+/api/v1/get_duplicates
+
+Expects:
+
+Returns:
+{
+    "success": <bool>,
+    "payload": <array of vehicles>
+}
+
+
+/api-auth/
+Expects:
+{
+    "username": <string>,
+    "password": <string>
+}
+
+Returns:
+{
+    "token": <string>
+}
+

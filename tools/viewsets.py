@@ -3,6 +3,7 @@ from functools import wraps
 from django.http import HttpResponse, QueryDict
 from django.views.decorators.csrf import csrf_exempt
 
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, exceptions
@@ -37,8 +38,8 @@ class ActionAPI(APIView):
     This will convert all requests to use the same function meaning that no matter what TYPE
     of requst you send it will go through
     """
-
-    # permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [permissions.IsAuthenticated]
 
     _last_action = None
 
@@ -51,12 +52,15 @@ class ActionAPI(APIView):
     def get(self, request, action, **kwargs):
         params = self.normalize_params(request)
 
+        response_code = 200
+
         kwargs["params"] = params
         self._last_action = params.get("action", action)
 
         try:
             lv_action = self.__getattribute__(self._last_action)
         except AttributeError:
+            response_code = 404
             lv_action = self.action_does_not_exist
 
         response = lv_action(request, **kwargs)
@@ -74,7 +78,7 @@ class ActionAPI(APIView):
         )
 
         serialised = APISerializer(response, context=response_context)
-        return Response(serialised.data)
+        return Response(serialised.data, response_code)
 
 
     def action_does_not_exist(self, *args, **kwargs):
