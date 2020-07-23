@@ -86,7 +86,8 @@ class VehicleBase(ActionAPI):
             }
 
             tracking_serializer = TrackingSerializer(data=tracking_data)
-            tracking_serializer.save()
+            if (tracking_serializer.is_valid()):
+                tracking_serializer.save()
 
             return {
                 "success": True,
@@ -108,13 +109,14 @@ class VehicleBase(ActionAPI):
             serializer.save()
 
             tracking_data = {
-                "vehicle": serializer.instance(),
+                "vehicle": serializer.data.get("id"),
                 "date": datetime.now(),
                 "location": params.get("location", "No location")
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
-            tracking_serializer.save()
-
+            if (tracking_serializer.is_valid()):
+                tracking_serializer.save()
+            
             return serializer.data
         data = {
             "success": False,
