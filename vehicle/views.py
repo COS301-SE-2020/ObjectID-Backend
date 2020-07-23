@@ -63,12 +63,13 @@ class VehicleBase(ActionAPI):
                 if serializer.is_valid():
                     serializer.save()
                     tracking_data = {
-                        "vehicle": serializer.instance(),
+                        "vehicle": serializer.data.get("id"),
                         "date": datetime.now(),
                         "location": params.get("location", "No location")
                     }
                     tracking_serializer = TrackingSerializer(data=tracking_data)
-                    tracking_serializer.save()
+                    if tracking_serializer.is_valid():
+                        tracking_serializer.save()
                     return {
                         "success": True,
                         "duplicate": True,
@@ -114,9 +115,9 @@ class VehicleBase(ActionAPI):
                 "location": params.get("location", "No location")
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
-            if (tracking_serializer.is_valid()):
+            if tracking_serializer.is_valid():
                 tracking_serializer.save()
-            
+
             return serializer.data
         data = {
             "success": False,
@@ -332,7 +333,7 @@ class VehicleBase(ActionAPI):
                     tracking_serializer = TrackingSerializer(data=tracking_data)
                     tracking_serializer.save()
 
-                    image.vehicle = serializer.instance()
+                    image.vehicle = serializer.validated_data
                     image.save()
 
                     # TODO: Implement image ID and damage saving
@@ -354,7 +355,8 @@ class VehicleBase(ActionAPI):
             }
 
             tracking_serializer = TrackingSerializer(data=tracking_data)
-            tracking_serializer.save()
+            if tracking_serializer.is_valid():
+                tracking_serializer.save()
             image.vehicle = vehicle
             image.save()
 
@@ -380,14 +382,15 @@ class VehicleBase(ActionAPI):
             serializer.save()
 
             tracking_data = {
-                "vehicle": serializer.instance(),
+                "vehicle": serializer.data.get("id"),
                 "date": datetime.now(),
                 "location": params.get("location", "No location")
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
-            tracking_serializer.save()
+            if tracking_serializer.is_valid():
+                tracking_serializer.save()
 
-            image.vehicle = serializer.instance()
+            image.vehicle = serializer.validated_data
             image.save()
 
             # TODO: Implement image ID and damage saving
