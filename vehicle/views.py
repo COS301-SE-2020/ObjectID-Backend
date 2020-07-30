@@ -425,5 +425,3 @@ class VehicleBase(ActionAPI):
         serializer = VehicleSerializer(queryset, many=True)
 
         return serializer.data
-
-        
