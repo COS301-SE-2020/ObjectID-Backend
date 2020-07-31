@@ -13,7 +13,7 @@ from tools.viewsets import ActionAPI, validate_params
 
 
 class VehicleBase(ActionAPI):
-    # TODO: Place this back in when login is added
+    
     permission_classes = [permissions.IsAuthenticated, ] 
     @csrf_exempt
     @validate_params(['license_plate'])
@@ -65,7 +65,8 @@ class VehicleBase(ActionAPI):
                     tracking_data = {
                         "vehicle": serializer.data.get("id"),
                         "date": datetime.now(),
-                        "location": params.get("location", "No location")
+                        "lat": params.get("lat", None),
+                        "long": params.get("long", None)
                     }
                     tracking_serializer = TrackingSerializer(data=tracking_data)
                     if tracking_serializer.is_valid():
@@ -112,7 +113,8 @@ class VehicleBase(ActionAPI):
             tracking_data = {
                 "vehicle": serializer.data.get("id"),
                 "date": datetime.now(),
-                "location": params.get("location", "No location")
+                "lat": params.get("lat", None),
+                "long": params.get("long", None)
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
             if tracking_serializer.is_valid():
@@ -328,7 +330,8 @@ class VehicleBase(ActionAPI):
                     tracking_data = {
                         "vehicle": serializer.instance(),
                         "date": datetime.now(),
-                        "location": params.get("location", "No location")
+                        "lat": params.get("lat", None),
+                        "long": params.get("long", None)
                     }
                     tracking_serializer = TrackingSerializer(data=tracking_data)
                     tracking_serializer.save()
@@ -384,7 +387,8 @@ class VehicleBase(ActionAPI):
             tracking_data = {
                 "vehicle": serializer.data.get("id"),
                 "date": datetime.now(),
-                "location": params.get("location", "No location")
+                "lat": params.get("lat", None),
+                "long": params.get("long", None)
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
             if tracking_serializer.is_valid():
