@@ -81,3 +81,11 @@ Returns:
     "token": <string>
 }
 
+/api/v1/vehicle/detect
+Expects:
+{
+    "file" : <video>
+}
+
+Returns:
+
