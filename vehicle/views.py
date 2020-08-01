@@ -557,4 +557,7 @@ class VehicleBase(ActionAPI):
         vehicle.license_plate_duplicate = params.get('license_plate_duplicate', vehicle.license_plate_duplicate)
 
         vehicle.save()
-        return { "success" : True }
+        serializer = VehicleSerializer(vehicle)
+
+        return { "success" : True,
+                    "data" : serializer.data }
