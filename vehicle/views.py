@@ -6,8 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from rest_framework import permissions, filters
 
-from .models import Vehicle, ImageSpace
-from .serializers import VehicleSerializer
+from .models import Vehicle, ImageSpace, MarkedVehicle
+from .serializers import VehicleSerializer, MarkedVehicleSerializer
+from .utils import check_for_mark
 from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
@@ -42,6 +43,7 @@ class VehicleBase(ActionAPI):
         # TODO: Implement SAPS flag checking
 
         vehicle = Vehicle.objects.filter(license_plate=params['license_plate'])
+        check_for_mark(params['license_plate'])
 
         if vehicle.count() > 0:
             vehicle = vehicle[0]
@@ -307,6 +309,7 @@ class VehicleBase(ActionAPI):
         vehicle = Vehicle.objects.filter(license_plate=params['license_plate'])
         image = ImageSpace(image=params['file'])
         image.save()
+        check_for_mark(params['license_plate'])
 
         if vehicle.count() > 0:
             vehicle = vehicle[0]
@@ -430,4 +433,61 @@ class VehicleBase(ActionAPI):
 
         return serializer.data
 
+    @validate_params(['license_plate'])
+    def add_marked_vehicle(self, request, params=None, *args, **kwargs):
+        """
+        Used to add a marked vehicle
+        """
+
+        data = {
+            "license_plate": params['license_plate'],
+            "marked_by": request.user
+        }
+
+
+        serializer = MarkedVehicleSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return {
+                "success": True
+            }
+
+        return {
+            "success": False,
+            "payload": serializer.errors
+        }
+
+    def get_marked_vehicles(self, request, params=None, *args, **kwargs):
+        """
+        Used to retrieve a dataset of the marked vehicles by the current auth'd user
+        """
+
+        queryset = MarkedVehicle.objects.filter(marked_by=request.user)
+
+        if queryset.count() > 0:
+            serializer = MarkedVehicleSerializer(queryset, many=True)
+            return serializer.data
         
+        return {
+            "message": "There are no vehicles marked by this user"
+        }
+
+    @validate_params(['license_plate'])
+    def remove_marked_vehicle(self, request, params=None, *args, **kwargs):
+        """
+        Used to remove a marked vehicle
+        """
+
+        queryset = MarkedVehicle.objects.filter(license_plate=params['license_plate'])
+
+        if queryset.count() > 0:
+            queryset.delete()
+            return {
+                "success": True
+            }
+
+        return {
+            "success": False,
+            "message": "There are no vehicles marked with that license plate"
+        }

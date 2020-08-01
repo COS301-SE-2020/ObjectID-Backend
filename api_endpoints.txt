@@ -81,3 +81,34 @@ Returns:
     "token": <string>
 }
 
+
+/vehicle/add_marked_vehicle
+Expects:
+{
+    "license_plate": <string>
+}
+
+Returns:
+{
+    "success": bool
+}
+
+/vehicle/get_marked_vehicles
+Expects:
+
+Returns:
+{
+    "success": bool,
+    "payload": <array of marked vehicles>
+}
+
+/vehicle/remove_marked_vehicle
+Expects:
+{
+    "license_plate": <string>
+}
+
+Returns:
+{
+    "success": <bool>
+}

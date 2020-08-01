@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
 # Create your models here.
 
@@ -37,3 +38,7 @@ class Damage(models.Model):
 class ImageSpace(models.Model):
     image = models.ImageField(upload_to='vehicles/%Y/%m/%d/')
     vehicle = models.ForeignKey(Vehicle, null=True, blank=True, on_delete=models.CASCADE)
+
+class MarkedVehicle(models.Model):
+    license_plate = models.CharField(max_length=10)
+    marked_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='marked_vehicle')
