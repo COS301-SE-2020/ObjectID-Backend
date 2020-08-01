@@ -8,4 +8,5 @@ from vehicle.models import Vehicle
 class VehicleLog(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='tracking')
     date = models.DateTimeField()
-    location = models.CharField(max_length=256) # TODO: Check if we make this set locations. I.e Gauteng as a key, then a city then etc etc
+    lat = models.DecimalField(blank=True, max_digits=9, decimal_places=6, default=None)
+    long = models.DecimalField(blank=True ,max_digits=9, decimal_places=6, default=None)

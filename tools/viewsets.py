@@ -13,7 +13,7 @@ from tools.serializers import APISerializer
 
 def validate_paramaters(params, checklist, *args, **kwargs):
     for item in checklist:
-        if item not in checklist:
+        if item not in params:
             return False
     return True
 
