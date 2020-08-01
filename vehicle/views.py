@@ -549,12 +549,30 @@ class VehicleBase(ActionAPI):
                 "message": "Vehicle with that license plate does not exist"
             }  
 
+        if (params.get("license_plate_duplicate", None) in [False, 'false', 'False']) and (vehicle.license_plate_duplicate is True) and (params.get("license_plate", None)):
+            qs = Vehicle.objects.filter(license_plate=vehicle.license_plate).exclude(id=vehicle.id)
+            if qs.count() < 2:
+                qs = qs[0]
+                qs.license_plate_duplicate = False
+                qs.save()
+        
+        if (params.get("license_plate_duplicate", None) in [True, 'true', 'True']) and (vehicle.license_plate_duplicate is False) and (params.get("license_plate", None)):
+            qs = Vehicle.objects.filter(license_plate = params.get("license_plate"))
+            for item in qs:
+                item.license_plate_duplicate = True
+                item.save()
+
         vehicle.license_plate = params.get("license_plate", vehicle.license_plate)
         vehicle.make = params.get('make', vehicle.make)
         vehicle.model = params.get('model', vehicle.model)
         vehicle.color = params.get('color', vehicle.color)
         vehicle.saps_flagged = params.get('saps_flagged', vehicle.saps_flagged)
-        vehicle.license_plate_duplicate = params.get('license_plate_duplicate', vehicle.license_plate_duplicate)
+        flag = params.get('license_plate_duplicate', vehicle.license_plate_duplicate)
+        if flag in [False, 'false', 'False']:
+            flag = False
+        if flag in [True, 'true', 'True']:
+            flag = True
+        vehicle.license_plate_duplicate = flag
 
         vehicle.save()
         serializer = VehicleSerializer(vehicle)
