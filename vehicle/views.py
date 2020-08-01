@@ -23,13 +23,13 @@ class VehicleBase(ActionAPI):
     
     permission_classes = [permissions.IsAuthenticated, ] 
     @csrf_exempt
-    @validate_params(['license_plate'])
+    @validate_params(['vehicle_id'])
     def get_vehicle(self, request, params=None, *args, **kwargs):
         """
         Simply a way of getting all the information on a specified vehicle
         """
         try:
-            vehicle = Vehicle.objects.get(license_plate=params['license_plate'])
+            vehicle = Vehicle.objects.get(pk=params['vehicle_id'])
         except Vehicle.DoesNotExist:
             return {
                 "success": False,
@@ -561,3 +561,4 @@ class VehicleBase(ActionAPI):
 
         return { "success" : True,
                     "data" : serializer.data }
+
