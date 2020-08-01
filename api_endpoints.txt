@@ -81,6 +81,14 @@ Returns:
     "token": <string>
 }
 
+/api/v1/vehicle/detect
+Expects:
+{
+    "file" : <video>
+}
+
+Returns:
+
 
 /vehicle/add_marked_vehicle
 Expects:

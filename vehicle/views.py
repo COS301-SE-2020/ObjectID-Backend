@@ -12,6 +12,12 @@ from .utils import check_for_mark
 from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
+import cv2
+import os
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+
 
 class VehicleBase(ActionAPI):
     
@@ -433,6 +439,41 @@ class VehicleBase(ActionAPI):
 
         return serializer.data
 
+      
+    @csrf_exempt
+    def detect(self, request, params=None, *args, **kwags):
+        os.environ['DISPLAY'] = ':0'
+
+        data = request.FILES['file'] # or self.files['image'] in your form
+
+        path = default_storage.save('vehicle/training_data/video.avi', ContentFile(data.read()))
+        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+        
+        # capture frames from a video
+        cap = cv2.VideoCapture(tmp_file)
+
+        # Trained XML classifiers describes some features of some object we want to detect
+        car_cascade = cv2.CascadeClassifier('vehicle/training_data/cars.xml')
+
+        # loop runs if capturing has been initialized.
+        while True:
+            # reads frames from a video
+            ret, frames = cap.read()
+                # convert to gray scale of each frames
+            gray = cv2.cvtColor(frames, cv2.COLOR_BGR2GRAY)
+            # Detects cars of different sizes in the input image
+            cars = car_cascade.detectMultiScale(gray, 1.1, 1)
+            # To draw a rectangle in each cars
+            for (x,y,w,h) in cars:
+                cv2.rectangle(frames,(x,y),(x+w,y+h),(0,0,255),2)
+        # Display frames in a window 
+                cv2.imshow('video', frames)
+            # Wait for Esc key to stop
+            if cv2.waitKey(33) == 27:
+                break
+        # De-allocate any associated memory usage
+        cv2.destroyAllWindows()
+
     @validate_params(['license_plate'])
     def add_marked_vehicle(self, request, params=None, *args, **kwargs):
         """
@@ -492,6 +533,7 @@ class VehicleBase(ActionAPI):
             "message": "There are no vehicles marked with that license plate"
         }
 
+
     @csrf_exempt
     @validate_params(['license_plate'])
     def edit_vehicle(self, request, params=None, *args, **kwargs):
@@ -516,7 +558,3 @@ class VehicleBase(ActionAPI):
 
         vehicle.save()
         return { "success" : True }
-
-        
-
-
