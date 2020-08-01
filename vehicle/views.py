@@ -491,3 +491,32 @@ class VehicleBase(ActionAPI):
             "success": False,
             "message": "There are no vehicles marked with that license plate"
         }
+
+    @csrf_exempt
+    @validate_params(['license_plate'])
+    def edit_vehicle(self, request, params=None, *args, **kwargs):
+        """
+        Used to edit and existing vehicles attributes
+        """
+
+        try:
+            vehicle = Vehicle.objects.get(license_plate=params['license_plate'])
+        except Vehicle.DoesNotExist:
+            return {
+                "success": False,
+                "message": "Vehicle with that license plate does not exist"
+            }  
+
+        vehicle.license_plate = params.get("license_plate", vehicle.license_plate)
+        vehicle.make = params.get('make', vehicle.make)
+        vehicle.model = params.get('model', vehicle.model)
+        vehicle.color = params.get('color', vehicle.color)
+        vehicle.saps_flagged = params.get('saps_flagged', vehicle.saps_flagged)
+        vehicle.license_plate_duplicate = params.get('license_plate_duplicate', vehicle.license_plate_duplicate)
+
+        vehicle.save()
+        return { "success" : True }
+
+        
+
+
