@@ -535,14 +535,14 @@ class VehicleBase(ActionAPI):
 
 
     @csrf_exempt
-    @validate_params(['license_plate'])
+    @validate_params(['vehicle_id'])
     def edit_vehicle(self, request, params=None, *args, **kwargs):
         """
         Used to edit and existing vehicles attributes
         """
 
         try:
-            vehicle = Vehicle.objects.get(license_plate=params['license_plate'])
+            vehicle = Vehicle.objects.get(pk=params['vehicle_id'])
         except Vehicle.DoesNotExist:
             return {
                 "success": False,
