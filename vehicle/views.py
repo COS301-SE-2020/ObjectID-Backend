@@ -441,7 +441,7 @@ class VehicleBase(ActionAPI):
 
         data = {
             "license_plate": params['license_plate'],
-            "marked_by": request.user
+            "marked_by": request.user.id
         }
 
 
