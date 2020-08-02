@@ -474,6 +474,8 @@ class VehicleBase(ActionAPI):
         # De-allocate any associated memory usage
         cv2.destroyAllWindows()
 
+        return {"success" : True}
+
     @validate_params(['license_plate'])
     def add_marked_vehicle(self, request, params=None, *args, **kwargs):
         """
