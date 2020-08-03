@@ -140,4 +140,3 @@ Returns:
     payload : <vehicle object>
 }
 
-

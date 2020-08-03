@@ -579,6 +579,4 @@ class VehicleBase(ActionAPI):
         vehicle.save()
         serializer = VehicleSerializer(vehicle)
 
-        return { "success" : True,
-                    "data" : serializer.data }
-
+        return serializer.data
