@@ -12,18 +12,24 @@ from .utils import check_for_mark
 from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
+import cv2
+import os
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+
 
 class VehicleBase(ActionAPI):
     
     permission_classes = [permissions.IsAuthenticated, ] 
     @csrf_exempt
-    @validate_params(['license_plate'])
+    @validate_params(['vehicle_id'])
     def get_vehicle(self, request, params=None, *args, **kwargs):
         """
         Simply a way of getting all the information on a specified vehicle
         """
         try:
-            vehicle = Vehicle.objects.get(license_plate=params['license_plate'])
+            vehicle = Vehicle.objects.get(pk=params['vehicle_id'])
         except Vehicle.DoesNotExist:
             return {
                 "success": False,
@@ -433,6 +439,43 @@ class VehicleBase(ActionAPI):
 
         return serializer.data
 
+      
+    @csrf_exempt
+    def detect(self, request, params=None, *args, **kwags):
+        os.environ['DISPLAY'] = ':0'
+
+        data = request.FILES['file'] # or self.files['image'] in your form
+
+        path = default_storage.save('vehicle/training_data/video.avi', ContentFile(data.read()))
+        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+        
+        # capture frames from a video
+        cap = cv2.VideoCapture(tmp_file)
+
+        # Trained XML classifiers describes some features of some object we want to detect
+        car_cascade = cv2.CascadeClassifier('vehicle/training_data/cars.xml')
+
+        # loop runs if capturing has been initialized.
+        while True:
+            # reads frames from a video
+            ret, frames = cap.read()
+                # convert to gray scale of each frames
+            gray = cv2.cvtColor(frames, cv2.COLOR_BGR2GRAY)
+            # Detects cars of different sizes in the input image
+            cars = car_cascade.detectMultiScale(gray, 1.1, 1)
+            # To draw a rectangle in each cars
+            for (x,y,w,h) in cars:
+                cv2.rectangle(frames,(x,y),(x+w,y+h),(0,0,255),2)
+        # Display frames in a window 
+                cv2.imshow('video', frames)
+            # Wait for Esc key to stop
+            if cv2.waitKey(33) == 27:
+                break
+        # De-allocate any associated memory usage
+        cv2.destroyAllWindows()
+
+        return {"success" : True}
+
     @validate_params(['license_plate'])
     def add_marked_vehicle(self, request, params=None, *args, **kwargs):
         """
@@ -491,3 +534,51 @@ class VehicleBase(ActionAPI):
             "success": False,
             "message": "There are no vehicles marked with that license plate"
         }
+
+
+    @csrf_exempt
+    @validate_params(['vehicle_id'])
+    def edit_vehicle(self, request, params=None, *args, **kwargs):
+        """
+        Used to edit and existing vehicles attributes
+        """
+
+        try:
+            vehicle = Vehicle.objects.get(pk=params['vehicle_id'])
+        except Vehicle.DoesNotExist:
+            return {
+                "success": False,
+                "message": "Vehicle with that license plate does not exist"
+            }  
+
+        if (params.get("license_plate_duplicate", None) in [False, 'false', 'False']) and (vehicle.license_plate_duplicate is True) and (params.get("license_plate", None)):
+            qs = Vehicle.objects.filter(license_plate=vehicle.license_plate).exclude(id=vehicle.id)
+            if qs.count() < 2:
+                qs = qs[0]
+                qs.license_plate_duplicate = False
+                qs.save()
+        
+        if (params.get("license_plate_duplicate", None) in [True, 'true', 'True']) and (vehicle.license_plate_duplicate is False) and (params.get("license_plate", None)):
+            qs = Vehicle.objects.filter(license_plate = params.get("license_plate"))
+            for item in qs:
+                item.license_plate_duplicate = True
+                item.save()
+
+        vehicle.license_plate = params.get("license_plate", vehicle.license_plate)
+        vehicle.make = params.get('make', vehicle.make)
+        vehicle.model = params.get('model', vehicle.model)
+        vehicle.color = params.get('color', vehicle.color)
+        vehicle.saps_flagged = params.get('saps_flagged', vehicle.saps_flagged)
+        flag = params.get('license_plate_duplicate', vehicle.license_plate_duplicate)
+        if flag in [False, 'false', 'False']:
+            flag = False
+        if flag in [True, 'true', 'True']:
+            flag = True
+        vehicle.license_plate_duplicate = flag
+
+        vehicle.save()
+        serializer = VehicleSerializer(vehicle)
+
+        return { "success" : True,
+                    "data" : serializer.data }
+
