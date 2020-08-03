@@ -53,6 +53,13 @@ DATABASES = {
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_PORT = 587
+
+EMAIL_HOST_USER = 'ctrl.intelligence@gmail.com'
+EMAIL_HOST_PASSWORD = 'Ctrl+Intelligence312##'
+
 # URLS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf

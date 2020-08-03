@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.core.mail import send_mail
 
 from rest_framework import permissions
 
@@ -16,6 +17,15 @@ class CustomUserBase(ActionAPI):
 
         if form.is_valid():
             form.save()
+
+            send_mail(
+                'ObjectID Registration',
+                'Your email address was successfully registered with ObjectID',
+                'ctrl.intelligence@gmail.com',
+                [params["email"]],
+                fail_silently=False
+            )
+
             return {"success": True}
         else:
             return {
