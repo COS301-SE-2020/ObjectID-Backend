@@ -25,7 +25,7 @@ class CustomUserBase(ActionAPI):
             #     [params["email"]],
             #     fail_silently=False
             # )
-            send(params['email'], 1)
+            #send(params['email'], 1)
 
             return {"success": True}
         else:
