@@ -5,7 +5,7 @@ from rest_framework import permissions
 
 from tools.viewsets import ActionAPI, validate_params
 from .forms import RegisterForm
-from email_custom.utils import send
+from custom_user.send_email import send
 
 class CustomUserBase(ActionAPI):
 
