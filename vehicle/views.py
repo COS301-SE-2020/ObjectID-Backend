@@ -17,6 +17,7 @@ import os
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+import requests
 
 
 class VehicleBase(ActionAPI):
@@ -580,3 +581,6 @@ class VehicleBase(ActionAPI):
         serializer = VehicleSerializer(vehicle)
 
         return serializer.data
+
+    def stream_analyzer(self, request, params=None, *args, **kwargs):
+        
