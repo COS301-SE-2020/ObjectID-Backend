@@ -8,7 +8,7 @@ from rest_framework import permissions, filters
 
 from .models import Vehicle, ImageSpace, MarkedVehicle
 from .serializers import VehicleSerializer, MarkedVehicleSerializer
-from .utils import check_for_mark
+from .utils import check_for_mark, open_cam_rtsp
 from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
@@ -585,14 +585,19 @@ class VehicleBase(ActionAPI):
 
         return serializer.data
 
+    @validate_params(["camera_url", "camera_location"])
     def stream_analyzer(self, request, params=None, *args, **kwargs):
+
+        camera_url = params["camera_url"]
+        camera_url = params["camera_location"]
+
         alpr = Alpr('eu', 'eu.conf', '/usr/share/openalpr/runtime_data')  
         if not alpr.is_loaded():
             return{"success" : False,
                 "Error" : 'Error loading OpenALPR'}
         alpr.set_top_n(3)
 
-        cap = open_cam_rtsp("URL of camera stream")
+        cap = open_cam_rtsp(camera_url) #CALL FOR CAMERA STREAMS
         if not cap.isOpened():
             alpr.unload()
             return {"success" : False,
@@ -600,10 +605,32 @@ class VehicleBase(ActionAPI):
         cv2.namedWindow("OpenALPR", cv2.WINDOW_AUTOSIZE)
         cv2.setWindowTitle("OpenALPR", 'OpenALPR video test')
 
+        _frame_number = 0
+        while True:
+            ret_val, frame = cap.read()
+            if not ret_val:
+                return {"success" : False,
+                "Error" : 'VidepCapture.read() failed'}
 
-    def open_cam_rtsp(self, uri, width=1280, height=720, latency=2000):
-        gst_str = ('rtspsrc location={} latency={} ! '
-               'rtph264depay ! h264parse ! omxh264dec ! nvvidconv ! '
-               'video/x-raw, width=(int){}, height=(int){}, format=(string)BGRx ! '
-               'videoconvert ! appsink').format(uri, latency, width, height)
-        return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+            _frame_number += 1
+            if _frame_number % 15 != 0:
+                continue
+            cv2.imshow("OpenALPR", frame)
+
+            results = alpr.recognize_ndarray(frame)
+            for i, plate in enumerate(results['results']):
+                best_candidate = plate['candidates'][0]
+                res = 'Plate #{}: {:7s} ({:.2f}%)'.format(i, best_candidate['plate'].upper(), best_candidate['confidence'])
+                return {"success" : True,
+                        "payload" : res}
+
+            if cv2.waitKey(1) == 27:
+                break
+
+        cv2.destroyAllWindows()
+        cap.release()
+        alpr.unload()
+
+
+
+   
