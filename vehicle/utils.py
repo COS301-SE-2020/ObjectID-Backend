@@ -21,9 +21,9 @@ def check_for_mark(license_plate):
             fail_silently=False
         )
 
- def open_cam_rtsp(uri, width=1280, height=720, latency=2000): #code for adding a camera stream MUST BE RELOCATED
-        gst_str = ('rtspsrc location={} latency={} ! '
+def open_cam_rtsp(uri, width=1280, height=720, latency=2000): #code for adding a camera stream MUST BE RELOCATED
+    gst_str = ('rtspsrc location={} latency={} ! '
                'rtph264depay ! h264parse ! omxh264dec ! nvvidconv ! '
                'video/x-raw, width=(int){}, height=(int){}, format=(string)BGRx ! '
                'videoconvert ! appsink').format(uri, latency, width, height)
-        return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
