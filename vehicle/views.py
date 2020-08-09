@@ -18,6 +18,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 import requests
+import numpy as np
+from openalpr import Alpr
+import sys
 
 
 class VehicleBase(ActionAPI):
@@ -583,4 +586,24 @@ class VehicleBase(ActionAPI):
         return serializer.data
 
     def stream_analyzer(self, request, params=None, *args, **kwargs):
-        
+        alpr = Alpr('eu', 'eu.conf', '/usr/share/openalpr/runtime_data')  
+        if not alpr.is_loaded():
+            return{"success" : False,
+                "Error" : 'Error loading OpenALPR'}
+        alpr.set_top_n(3)
+
+        cap = open_cam_rtsp("URL of camera stream")
+        if not cap.isOpened():
+            alpr.unload()
+            return {"success" : False,
+                "Error" : "Failed to open video file!"}
+        cv2.namedWindow("OpenALPR", cv2.WINDOW_AUTOSIZE)
+        cv2.setWindowTitle("OpenALPR", 'OpenALPR video test')
+
+
+    def open_cam_rtsp(self, uri, width=1280, height=720, latency=2000):
+        gst_str = ('rtspsrc location={} latency={} ! '
+               'rtph264depay ! h264parse ! omxh264dec ! nvvidconv ! '
+               'video/x-raw, width=(int){}, height=(int){}, format=(string)BGRx ! '
+               'videoconvert ! appsink').format(uri, latency, width, height)
+        return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
