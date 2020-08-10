@@ -10,5 +10,3 @@ def send(address,type):
     elif type == 2:
         server.quick_email(address, "Account Removed", ['Greetings ' + address + '.\n', 'Your account has been suspended, and you will no longer be able to use the ObjectID system ' +
                                                                 'if you require any assistance please mail ctrl.intelligence@gmail.com.\n', 'Thank you for using ObjectID.'])
-
-send("haainks@gmail.com",1)
