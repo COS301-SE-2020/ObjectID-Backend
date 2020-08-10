@@ -22,6 +22,8 @@ import numpy as np
 from openalpr import Alpr
 import sys
 
+from custom_user import send_email
+
 
 class VehicleBase(ActionAPI):
     
@@ -283,6 +285,8 @@ class VehicleBase(ActionAPI):
         result = result[0]
         plate = result.get('plate', None)
 
+        sapsFlagged = self.saps_API(plate)
+
         if plate is not None:
             # TODO: Implement all the 'tbi' factors as well as damage
             data = {
@@ -290,7 +294,7 @@ class VehicleBase(ActionAPI):
                 'color': 'tbi',
                 'make' : 'tbi',
                 'model': 'tbi',
-                'saps_flagged': False,
+                'saps_flagged': sapsFlagged,
                 'license_plate_duplicate': False,
             }
 
@@ -385,21 +389,11 @@ class VehicleBase(ActionAPI):
         
         # This vehicle is not within our system yet, add it
 
-        url = "https://engine.metagrated.com/api/v3/lookup"
-        license_plate = params["license_plate"]
-        license_plate = str(license_plate)
-        payload = "{\r\n\t\"camera_id\":837,\r\n\t\"number_plate\":"+"\""+license_plate+"\""+",\r\n\t\"latitude\":\"0\",\r\n\t\"longitude\":\"0\"\r\n}\r\n"
-        
-        headers = {
-  'Content-Type': 'application/json',
-  'x-api-key': '973c5229fb362f63db25b3131b45b17a119d05cb',
-  'Accept': 'application/json'
-}
+        sapsFlagged = self.saps_API(params["license_plate"])
 
-        response = requests.request("POST", url, headers=headers, data = payload)
-        sapsFlagged = False
-        if '\"Y\"' in response.text.encode('utf8'):
-            sapsFlagged = True
+        if sapsFlagged == True:
+
+
 
 
         data = {
@@ -649,7 +643,8 @@ class VehicleBase(ActionAPI):
         cap.release()
         alpr.unload()
 
-    def test(self, request, params=None, *args, **kwargs):
+    @validate_params(["license_plate"])
+    def saps_API(self, request, params=None, *args, **kwargs):
         url = "https://engine.metagrated.com/api/v3/lookup"
         license_plate = params["license_plate"]
         license_plate = str(license_plate)
@@ -663,8 +658,8 @@ class VehicleBase(ActionAPI):
 
         response = requests.request("POST", url, headers=headers, data = payload)
         sapsFlagged = False
-        if '\"N\"' in response.text:
+        if '\"Y\"' in response.text.encode('utf8'):
             sapsFlagged = True
-        return {"success" : sapsFlagged}
+        return sapsFlagged
 
    
