@@ -392,7 +392,7 @@ class VehicleBase(ActionAPI):
         sapsFlagged = self.saps_API(params["license_plate"])
 
         if sapsFlagged == True:
-
+            #still have to set up email if vehicle is flagged
 
 
 
