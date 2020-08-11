@@ -286,6 +286,8 @@ class VehicleBase(ActionAPI):
         plate = result.get('plate', None)
 
         sapsFlagged = self.saps_API(plate)
+        if sapsFlagged == True:
+            send_email.flagged_notification("email",plate,"Crime",params["file"],"location tbi","make tbi","model tbi","color tbi") #TODO add tbi elements
 
         if plate is not None:
             # TODO: Implement all the 'tbi' factors as well as damage
@@ -391,10 +393,9 @@ class VehicleBase(ActionAPI):
 
         sapsFlagged = self.saps_API(params["license_plate"])
 
+        sapsFlagged = self.saps_API(params["license_plate"])
         if sapsFlagged == True:
-            #still have to set up email if vehicle is flagged
-
-
+            send_email.flagged_notification("email",params["license_plate"],"Crime",params["file"],"location tbi","make tbi","model tbi","color tbi") #TODO add tbi elements
 
         data = {
             "license_plate": params["license_plate"],
