@@ -715,6 +715,9 @@ class VehicleBase(ActionAPI):
                 headers={'Authorization': 'token 8e744c1226777aa96d25e06807b69cbfc03f4c72'})
             
             return response
+
+    def colour_detection(self, request, params=None, *args, **kwargs):
+        
             
             
 
