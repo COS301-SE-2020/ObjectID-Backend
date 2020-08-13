@@ -274,16 +274,25 @@ class VehicleBase(ActionAPI):
         """
 
         from lpr.lpr import check_image
+        import json
 
         temp = ImageSpace(image=params['file'])
         temp.save()
         path = temp.image.path
 
-        result = check_image(path)
-
-        result = result.get('results', [])
-        result = result[0]
-        plate = result.get('plate', None)
+        regions = ['za'] # Change to your country
+        with open(path, 'rb') as fp:
+            response = requests.post(
+        'https://api.platerecognizer.com/v1/plate-reader/',
+            data=dict(regions=regions),  # Optional
+            files=dict(upload=fp),
+            headers={'Authorization': 'token 8e744c1226777aa96d25e06807b69cbfc03f4c72'})
+        res = response.json()
+        
+        res = res["results"]
+        
+        res = res[0]
+        plate = res["plate"]
 
         lp = {"license_plate" : plate}
 
@@ -669,46 +678,43 @@ class VehicleBase(ActionAPI):
 
     
     def lpr_video_analyzer(self, request, params=None, *args, **kwargs):
+        os.environ['DISPLAY'] = ':0'
+
+        from lpr.lpr import check_image
+        from PIL import Image
+
+        data = request.FILES['file'] # or self.files['image'] in your form
+
+        path = default_storage.save('vehicle/training_data/video.mp4', ContentFile(data.read()))
+        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
 
         FRAME_SKIP = 15
 
-        alpr = Alpr('eu', 'eu.conf', '/usr/share/openalpr/runtime_data') 
-        if not alpr.is_loaded():
-            return {"success" : False,
-                "Error" : 'Error loading OpenALPR'}
-        alpr.set_top_n(3)
-        #alpr.set_default_region('new')
-
-        cap = cv2.VideoCapture(VIDEO_SOURCE)
-        if not cap.isOpened():
-            alpr.unload()
-            
-        cv2.namedWindow("OpenALPR", cv2.WINDOW_AUTOSIZE)
-        cv2.setWindowTitle("OpenALPR", 'OpenALPR video test')
+        cap = cv2.VideoCapture(tmp_file)
 
         _frame_number = 0
         while True:
             ret_val, frame = cap.read()
             if not ret_val:
-                return {"success" : False,
-                "Error" : 'VidepCapture.read() failed'}
+                break
+
+            img = Image.fromarray(frame)
+            img.save("vehicle/training_data/img.jpg","JPEG")
+           
 
             _frame_number += 1
             if _frame_number % FRAME_SKIP != 0:
                 continue
-            cv2.imshow("OpenALPR", frame)
 
-            results = alpr.recognize_ndarray(frame)
-            for i, plate in enumerate(results['results']):
-                best_candidate = plate['candidates'][0]
-                res = 'Plate #{}: {:7s} ({:.2f}%)'.format(i, best_candidate['plate'].upper(), best_candidate['confidence']))
-                return {"success" : true,
-                "payload" : res}
-
-            if cv2.waitKey(1) == 27:
-                break
-
-            cv2.destroyAllWindows()
-            cap.release()
-            alpr.unload()
+            regions = ['za'] # Change to your country
+            with open("vehicle/training_data/img.jpg", 'rb') as fp:
+                response = requests.post(
+        'https://api.platerecognizer.com/v1/plate-reader/',
+                data=dict(regions=regions),  # Optional
+                files=dict(upload=fp),
+                headers={'Authorization': 'token 8e744c1226777aa96d25e06807b69cbfc03f4c72'})
+            
+            return response
+            
+            
 
