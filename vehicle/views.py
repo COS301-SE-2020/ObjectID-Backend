@@ -285,9 +285,13 @@ class VehicleBase(ActionAPI):
         result = result[0]
         plate = result.get('plate', None)
 
-        sapsFlagged = self.saps_API(plate)
+        lp = {"license_plate" : plate}
+
+
+
+        sapsFlagged = self.saps_API(request, params=lp, *args, **kwargs)
         if sapsFlagged == True:
-            send_email.flagged_notification("email",plate,"Crime",params["file"],"location tbi","make tbi","model tbi","color tbi") #TODO add tbi elements
+            send_email.flagged_notification("stephendups@gmail.com",plate,"Crime",params["file"],"location tbi","make tbi","model tbi","color tbi") #TODO add tbi elements
 
         if plate is not None:
             # TODO: Implement all the 'tbi' factors as well as damage
@@ -652,15 +656,59 @@ class VehicleBase(ActionAPI):
         payload = "{\r\n\t\"camera_id\":837,\r\n\t\"number_plate\":"+"\""+license_plate+"\""+",\r\n\t\"latitude\":\"0\",\r\n\t\"longitude\":\"0\"\r\n}\r\n"
         
         headers = {
-  'Content-Type': 'application/json',
-  'x-api-key': '973c5229fb362f63db25b3131b45b17a119d05cb',
-  'Accept': 'application/json'
-}
+        'Content-Type': 'application/json',
+        'x-api-key': '973c5229fb362f63db25b3131b45b17a119d05cb',
+        'Accept': 'application/json'
+        }
 
         response = requests.request("POST", url, headers=headers, data = payload)
         sapsFlagged = False
-        if '\"Y\"' in response.text.encode('utf8'):
+        if '\"Y\"' in response.text:
             sapsFlagged = True
         return sapsFlagged
 
-   
+    
+    def lpr_video_analyzer(self, request, params=None, *args, **kwargs):
+
+        FRAME_SKIP = 15
+
+        alpr = Alpr('eu', 'eu.conf', '/usr/share/openalpr/runtime_data') 
+        if not alpr.is_loaded():
+            return {"success" : False,
+                "Error" : 'Error loading OpenALPR'}
+        alpr.set_top_n(3)
+        #alpr.set_default_region('new')
+
+        cap = cv2.VideoCapture(VIDEO_SOURCE)
+        if not cap.isOpened():
+            alpr.unload()
+            
+        cv2.namedWindow("OpenALPR", cv2.WINDOW_AUTOSIZE)
+        cv2.setWindowTitle("OpenALPR", 'OpenALPR video test')
+
+        _frame_number = 0
+        while True:
+            ret_val, frame = cap.read()
+            if not ret_val:
+                return {"success" : False,
+                "Error" : 'VidepCapture.read() failed'}
+
+            _frame_number += 1
+            if _frame_number % FRAME_SKIP != 0:
+                continue
+            cv2.imshow("OpenALPR", frame)
+
+            results = alpr.recognize_ndarray(frame)
+            for i, plate in enumerate(results['results']):
+                best_candidate = plate['candidates'][0]
+                res = 'Plate #{}: {:7s} ({:.2f}%)'.format(i, best_candidate['plate'].upper(), best_candidate['confidence']))
+                return {"success" : true,
+                "payload" : res}
+
+            if cv2.waitKey(1) == 27:
+                break
+
+            cv2.destroyAllWindows()
+            cap.release()
+            alpr.unload()
+
