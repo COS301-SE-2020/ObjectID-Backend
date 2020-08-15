@@ -716,18 +716,18 @@ class VehicleBase(ActionAPI):
             
             return response
 
+    @validate_params(["file"])
     def colour_detection(self, request, params=None, *args, **kwargs):
-        
-        # sys.path.insert(1, 'objectid/car_color_classifier_yolo3_python')
 
-        from mnt.d.objectid.car_color_classifier_yolo3_python import car_color_classifier_yolo3
+        from car_color_classifier_yolo3_python import detect
 
         temp = ImageSpace(image=params['file'])
         temp.save()
         path = temp.image.path
 
-        color = car_color_classifier_yolo3.car_color_classifier(path)
-        return color
+        color = detect.detect(path)
+        return {"success" : True,
+        "payload" : color}
 
 
             
