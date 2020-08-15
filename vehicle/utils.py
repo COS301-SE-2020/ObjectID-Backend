@@ -49,9 +49,12 @@ def saps_API(params=None, *args, **kwargs):
 
 def colour_detection(path):
 
-        from car_color_classifier_yolo3_python.detect import detect
+    from car_color_classifier_yolo3_python.detect import detect
+    color = detect(path)
+    return color
 
-
-        color = detect(path)
-        return color
+def make_model_detection(path):
+    from make_model_classifier.detect import detect_make_model
+    make_model = detect_make_model(path)
+    return make_model
         

@@ -280,6 +280,8 @@ class VehicleBase(ActionAPI):
         temp.save()
         path = temp.image.path
 
+        # TODO: Perhaps consider file size compression or file size too large returns
+
         regions = ['za'] # Change to your country
         with open(path, 'rb') as fp:
             response = requests.post(
@@ -318,6 +320,18 @@ class VehicleBase(ActionAPI):
             # color = colour_detection(path)
             bytes_ret = colour_detection(path)
             data["color"] = bytes_ret.decode("utf-8").strip("\n")
+
+            from .utils import make_model_detection
+            bytes_ret = make_model_detection(path).decode("utf-8")
+
+            if "Result 1:" in bytes_ret:
+                # TODO: Handling of multiple detections
+                pass
+            else:
+                bytes_ret = bytes_ret.split("\n")
+                data["model"] = bytes_ret[1]
+                data["make"] = bytes_ret[2]
+
             serializer = VehicleSerializer(data=data)
             if serializer.is_valid():
                 vehicle = serializer.save()
