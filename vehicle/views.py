@@ -8,7 +8,7 @@ from rest_framework import permissions, filters
 
 from .models import Vehicle, ImageSpace, MarkedVehicle
 from .serializers import VehicleSerializer, MarkedVehicleSerializer
-from .utils import check_for_mark, open_cam_rtsp
+from .utils import check_for_mark, open_cam_rtsp, saps_API
 from tracking.serializers import TrackingSerializer
 from tools.viewsets import ActionAPI, validate_params
 
@@ -298,7 +298,7 @@ class VehicleBase(ActionAPI):
 
 
 
-        sapsFlagged = self.saps_API(request, params=lp, *args, **kwargs)
+        sapsFlagged = saps_API(params=lp, *args, **kwargs)
         if sapsFlagged == True:
             send_email.flagged_notification("stephendups@gmail.com",plate,"Crime",params["file"],"location tbi","make tbi","model tbi","color tbi") #TODO add tbi elements
 
@@ -313,6 +313,11 @@ class VehicleBase(ActionAPI):
                 'license_plate_duplicate': False,
             }
 
+            from .utils import colour_detection
+
+            # color = colour_detection(path)
+            bytes_ret = colour_detection(path)
+            data["color"] = bytes_ret.decode("utf-8").strip("\n")
             serializer = VehicleSerializer(data=data)
             if serializer.is_valid():
                 vehicle = serializer.save()
@@ -657,24 +662,7 @@ class VehicleBase(ActionAPI):
         cap.release()
         alpr.unload()
 
-    @validate_params(["license_plate"])
-    def saps_API(self, request, params=None, *args, **kwargs):
-        url = "https://engine.metagrated.com/api/v3/lookup"
-        license_plate = params["license_plate"]
-        license_plate = str(license_plate)
-        payload = "{\r\n\t\"camera_id\":837,\r\n\t\"number_plate\":"+"\""+license_plate+"\""+",\r\n\t\"latitude\":\"0\",\r\n\t\"longitude\":\"0\"\r\n}\r\n"
-        
-        headers = {
-        'Content-Type': 'application/json',
-        'x-api-key': '973c5229fb362f63db25b3131b45b17a119d05cb',
-        'Accept': 'application/json'
-        }
-
-        response = requests.request("POST", url, headers=headers, data = payload)
-        sapsFlagged = False
-        if '\"Y\"' in response.text:
-            sapsFlagged = True
-        return sapsFlagged
+    
 
     
     def lpr_video_analyzer(self, request, params=None, *args, **kwargs):
@@ -716,18 +704,8 @@ class VehicleBase(ActionAPI):
             
             return response
 
-    @validate_params(["file"])
-    def colour_detection(self, request, params=None, *args, **kwargs):
 
-        from car_color_classifier_yolo3_python import detect
-
-        temp = ImageSpace(image=params['file'])
-        temp.save()
-        path = temp.image.path
-
-        color = detect.detect(path)
-        return {"success" : True,
-        "payload" : color}
+    
 
 
             

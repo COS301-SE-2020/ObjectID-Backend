@@ -2,6 +2,7 @@ from .models import MarkedVehicle
 from tracking.models import VehicleLog
 
 from django.core.mail import send_mail
+import requests
 
 
 def check_for_mark(license_plate):
@@ -27,3 +28,30 @@ def open_cam_rtsp(uri, width=1280, height=720, latency=2000): #code for adding a
                'video/x-raw, width=(int){}, height=(int){}, format=(string)BGRx ! '
                'videoconvert ! appsink').format(uri, latency, width, height)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+
+def saps_API(params=None, *args, **kwargs):
+        url = "https://engine.metagrated.com/api/v3/lookup"
+        license_plate = params["license_plate"]
+        license_plate = str(license_plate)
+        payload = "{\r\n\t\"camera_id\":837,\r\n\t\"number_plate\":"+"\""+license_plate+"\""+",\r\n\t\"latitude\":\"0\",\r\n\t\"longitude\":\"0\"\r\n}\r\n"
+        
+        headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': '973c5229fb362f63db25b3131b45b17a119d05cb',
+        'Accept': 'application/json'
+        }
+
+        response = requests.request("POST", url, headers=headers, data = payload)
+        sapsFlagged = False
+        if '\"Y\"' in response.text:
+            sapsFlagged = True
+        return sapsFlagged
+
+def colour_detection(path):
+
+        from car_color_classifier_yolo3_python.detect import detect
+
+
+        color = detect(path)
+        return color
+        
