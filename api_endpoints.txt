@@ -140,3 +140,20 @@ Returns:
     payload : <vehicle object>
 }
 
+/api/v1/vehicle/get_vehicle_locations
+Expects:
+{
+    license_plate : <string>
+}
+
+Returns:
+{
+    payload : [
+        {
+            "vehicle_id": <int>
+            "license_plate": <string>
+            "tracking": <array of tracking objects>
+        }
+    ]
+}
+
