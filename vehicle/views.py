@@ -451,7 +451,7 @@ class VehicleBase(ActionAPI):
                 send_email.flagged_notification(
                     request.user.email,
                     vehicle.license_plate,
-                    "This vehicle was involved in theft or possibly stolen",
+                    "this vehicle was involved in theft or possibly stolen",
                     params["file"], location, vehicle.make,
                     vehicle.model, vehicle.color
                 )
@@ -979,7 +979,7 @@ class VehicleBase(ActionAPI):
     @validate_params(["license_plate"])
     def get_vehicle_locations(self, request, params=None, *args, **kwargs):
         
-        vehicles = Vehicle.objects.filter(license_plate=params["license_plate"])
+        vehicles = Vehicle.objects.filter(license_plate__iexact=params["license_plate"])
 
         if vehicles.count() == 0:
             return {
