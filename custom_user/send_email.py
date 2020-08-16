@@ -1,7 +1,8 @@
 import email_to
+import custom_user.secrets as secrets
 
 def send(address,type):
-    server = email_to.EmailServer('smtp.gmail.com', 587, 'ctrl.intelligence@gmail.com', 'Ctrl+Intelligence312##')
+    server = email_to.EmailServer('smtp.gmail.com', 587, 'ctrl.intelligence@gmail.com', secrets.email_password)
 
     if type == 1:
         server.quick_email(address,"Successful Registration",['Welcome ' + address +'.\n', 'You have successfully been registered on the ObjectID system you will now be able ' +
