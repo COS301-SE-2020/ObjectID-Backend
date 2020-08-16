@@ -79,8 +79,8 @@ class VehicleBase(ActionAPI):
                     tracking_data = {
                         "vehicle": serializer.data.get("id"),
                         "date": datetime.now(),
-                        "lat": params.get("lat", None),
-                        "long": params.get("long", None)
+                        "lat": params.get("lat", 00.000000),
+                        "long": params.get("long", 00.000000)
                     }
                     tracking_serializer = TrackingSerializer(data=tracking_data)
                     if tracking_serializer.is_valid():
@@ -98,8 +98,8 @@ class VehicleBase(ActionAPI):
             tracking_data = {
                 "vehicle": vehicle,
                 "date": datetime.now(),
-                "lat": params.get("lat", None),
-                "long": params.get("long", None)
+                "lat": params.get("lat", 00.000000),
+                "long": params.get("long", 00.000000)
             }
 
             tracking_serializer = TrackingSerializer(data=tracking_data)
@@ -128,8 +128,8 @@ class VehicleBase(ActionAPI):
             tracking_data = {
                 "vehicle": serializer.data.get("id"),
                 "date": datetime.now(),
-                "lat": params.get("lat", None),
-                "long": params.get("long", None)
+                "lat": params.get("lat", 00.000000),
+                "long": params.get("long", 00.000000)
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
             if tracking_serializer.is_valid():
@@ -284,8 +284,8 @@ class VehicleBase(ActionAPI):
         tracking = {
             "vehicle": None,
             "date": datetime.now(),
-            "lat": params.get("lat", None),
-            "long": params.get("long", None)
+            "lat": params.get("lat", 00.000000),
+            "long": params.get("long", 00.000000)
         }
 
         # TODO: Perhaps consider file size compression or file size too large returns
@@ -362,13 +362,6 @@ class VehicleBase(ActionAPI):
                 "saps_flagged": False,
                 "license_plate_duplicate": False,
             }
-            # Do the duplicate license plate checks
-            duplicate_check = Vehicle.objects.filter(license_plate=plate)
-            if duplicate_check.count() > 0:
-                data["license_plate_duplicate"] = True
-                for vehicle in duplicate_check:
-                    vehicle.license_plate_duplicate = True
-                    vehicle.save()
 
             vehicle_data.append(data)
 
@@ -394,23 +387,60 @@ class VehicleBase(ActionAPI):
         
         vehicles = []
         for i, data in enumerate(vehicle_data):
-            serializer = VehicleSerializer(data=data)
-            image_space = image_space_items[i]
             
-            if serializer.is_valid():
-                vehicle = serializer.save()
-                tracking["vehicle"] = vehicle
-                tracking_serializer = TrackingSerializer(data=tracking)
-                if tracking_serializer.is_valid():
-                    tracking_serializer.save()
-                vehicles.append(vehicle)
-                image_space.vehicle = vehicle
-                image_space.save()
+            image_space = image_space_items[i]
+
+            duplicate_check = Vehicle.objects.filter(license_plate=data["license_plate"])
+
+            if duplicate_check.count() > 0:
+
+                for duplicate_item in duplicate_check:
+                    if duplicate_item.make.lower() == data["make"].lower() and\
+                        duplicate_item.model.lower() == data["model"].lower() and\
+                        duplicate_item.color.lower() == data["color"].lower():
+                        vehicles.append(duplicate_item)
+                        tracking["vehicle"] = duplicate_item.id
+                        tracking_serializer = TrackingSerializer(data=tracking)
+                        if tracking_serializer.is_valid():
+                            tracking_serializer.save()
+                        image_space.vehicle = duplicate_item
+                        image_space.save()
+                    else:
+                        duplicate_item.license_plate_duplicate = True
+                        duplicate_item.save()
+                        data["license_plate_duplicate"] = True
+                        serializer = VehicleSerializer(data=data)
+                        if serializer.is_valid():
+                            vehicle = serializer.save()
+                            tracking["vehicle"] = vehicle.id
+                            tracking_serializer = TrackingSerializer(data=tracking)
+                            if tracking_serializer.is_valid():
+                                tracking_serializer.save()
+                            vehicles.append(vehicle)
+                            image_space.vehicle = vehicle
+                            image_space.save()
+                        else:
+                            return {
+                                "success": False,
+                                "message": "There is something wrong with the detection of the vehicle"
+                            }
             else:
-                return {
-                    "success": False,
-                    "message": "There is something wrong with the detection of the vehicle"
-                }
+                serializer = VehicleSerializer(data=data)
+
+                if serializer.is_valid():
+                    vehicle = serializer.save()
+                    tracking["vehicle"] = vehicle.id
+                    tracking_serializer = TrackingSerializer(data=tracking)
+                    if tracking_serializer.is_valid():
+                        tracking_serializer.save()
+                    vehicles.append(vehicle)
+                    image_space.vehicle = vehicle
+                    image_space.save()
+                else:
+                    return {
+                        "success": False,
+                        "message": "There is something wrong with the detection of the vehicle"
+                    }
         
         for vehicle in vehicles:
             if vehicle.saps_flagged:
@@ -460,8 +490,8 @@ class VehicleBase(ActionAPI):
                     tracking_data = {
                         "vehicle": serializer.instance(),
                         "date": datetime.now(),
-                        "lat": params.get("lat", None),
-                        "long": params.get("long", None)
+                        "lat": params.get("lat", 00.000000),
+                        "long": params.get("long", 00.000000)
                     }
                     tracking_serializer = TrackingSerializer(data=tracking_data)
                     if tracking_serializer.is_valid():
@@ -525,8 +555,8 @@ class VehicleBase(ActionAPI):
             tracking_data = {
                 "vehicle": serializer.data.get("id"),
                 "date": datetime.now(),
-                "lat": params.get("lat", None),
-                "long": params.get("long", None)
+                "lat": params.get("lat", 00.000000),
+                "long": params.get("long", 00.000000)
             }
             tracking_serializer = TrackingSerializer(data=tracking_data)
             if tracking_serializer.is_valid():
@@ -809,7 +839,7 @@ class VehicleBase(ActionAPI):
                 "message": "There are no vehicles with that license plate in the system"
             }
 
-        payload = {}
+        payload = []
         for vehicle in vehicles:
             tracking_data = vehicle.tracking.all()
             tracking_serializer = TrackingSerializer(tracking_data, many=True)
