@@ -285,52 +285,39 @@ class VehicleBase(ActionAPI):
         regions = ['za'] # Change to your country
         with open(path, 'rb') as fp:
             response = requests.post(
-        'https://api.platerecognizer.com/v1/plate-reader/',
+            'https://api.platerecognizer.com/v1/plate-reader/',
             data=dict(regions=regions),  # Optional
             files=dict(upload=fp),
             headers={'Authorization': 'token 8e744c1226777aa96d25e06807b69cbfc03f4c72'})
         res = response.json()
         
-        res = res["results"]
-        
-        res = res[0]
-        plate = res["plate"]
-
-        lp = {"license_plate" : plate}
-
-
-
-        sapsFlagged = saps_API(params=lp, *args, **kwargs)
-        if sapsFlagged == True:
-            send_email.flagged_notification("stephendups@gmail.com",plate,"Crime",params["file"],"location tbi","make tbi","model tbi","color tbi") #TODO add tbi elements
-
-        if plate is not None:
-            # TODO: Implement all the 'tbi' factors as well as damage
-            data = {
-                'license_plate': plate,
-                'color': 'tbi',
-                'make' : 'tbi',
-                'model': 'tbi',
-                'saps_flagged': sapsFlagged,
-                'license_plate_duplicate': False,
+        if res.get("error", None):
+            return {
+                "success": False,
+                "message": "Invalid file"
             }
 
-            from .utils import colour_detection
+        res = res["results"]
 
-            # color = colour_detection(path)
+        
+        if len(res) is 0:
+            data = {
+                "license_plate": "",
+                "color": "tbi",
+                "make": "tbi",
+                "model": "tbi",
+                "saps_flagged": False,
+                "license_plate_duplicate": False
+            }
+
+            from .utils import colour_detection, make_model_detection
             bytes_ret = colour_detection(path)
-            data["color"] = bytes_ret.decode("utf-8").strip("\n")
-
-            from .utils import make_model_detection
-            bytes_ret = make_model_detection(path).decode("utf-8")
-
-            if "Result 1:" in bytes_ret:
-                # TODO: Handling of multiple detections
-                pass
-            else:
-                bytes_ret = bytes_ret.split("\n")
-                data["model"] = bytes_ret[1]
-                data["make"] = bytes_ret[2]
+            bytes_ret = bytes_ret.decode("utf-8").split("\n")
+            data["color"] = bytes_ret[0]
+            bytes_ret = make_model_detection(path)
+            bytes_ret = bytes_ret.decode("utf-8").split(":")
+            data["model"] = bytes_ret[0]
+            data["make"] = bytes_ret[1]
 
             serializer = VehicleSerializer(data=data)
             if serializer.is_valid():
@@ -338,15 +325,91 @@ class VehicleBase(ActionAPI):
                 temp.vehicle = vehicle
                 temp.save()
                 return serializer.data
-            return {
-                "success": False,
-                "payload": serializer.errors
-            }
 
-        return {
-            "success": False,
-            "reason": "Something went wrong with OpenALPR"
-        }
+        vehicle_data = []
+        image_space_items = []
+        image_space_items.append(temp)
+        first_iteration = True
+        # Init the values for each plate recognized
+        for item in res:
+            plate = item["plate"]
+
+            check_for_mark(plate)
+
+            if not first_iteration:
+                temp = ImageSpace(image=params['file'])
+                temp.save()
+                image_space_items.append(temp)
+                
+            first_iteration = False
+            data = {
+                "license_plate": plate,
+                "color": "tbi",
+                "make": "tbi",
+                "model": "tbi",
+                "saps_flagged": False,
+                "license_plate_duplicate": False,
+            }
+            # Do the duplicate license plate checks
+            duplicate_check = Vehicle.objects.filter(license_plate=plate)
+            if duplicate_check.count() > 0:
+                data["license_plate_duplicate"] = True
+                for vehicle in duplicate_check:
+                    vehicle.license_plate_duplicate = True
+                    vehicle.save()
+
+            vehicle_data.append(data)
+
+        # Do the saps flag checks
+        for data in vehicle_data:
+            saps_flag = saps_API(params={"license_plate": data["license_plate"]}, *args, **kwargs)
+            data["saps_flagged"] = saps_flag
+        
+        # Do the color detection for the vehicles
+        from .utils import colour_detection
+        bytes_ret = colour_detection(path)
+        bytes_ret = bytes_ret.decode("utf-8").split("\n")
+        for i, data in enumerate(vehicle_data):
+            data["color"] = bytes_ret[i]
+
+        # Do the make and model detection for the vehicle(s)
+        from .utils import make_model_detection
+        bytes_ret = make_model_detection(path).decode("utf-8").split("\n")
+        for i, data in enumerate(vehicle_data):
+            splitter = bytes_ret[i].split(":")
+            data["model"] = splitter[0]
+            data["make"] = splitter[1]
+        
+        vehicles = []
+        for i, data in enumerate(vehicle_data):
+            serializer = VehicleSerializer(data=data)
+            image_space = image_space_items[i]
+            
+            if serializer.is_valid():
+                vehicle = serializer.save()
+                vehicles.append(vehicle)
+                image_space.vehicle = vehicle
+                image_space.save()
+            else:
+                return {
+                    "success": False,
+                    "message": "There is something wrong with the detection of the vehicle"
+                }
+        
+        for vehicle in vehicles:
+            if vehicle.saps_flagged:
+                # send_email.flagged_notification(
+                #     "stephendups@gmail.com",
+                #     plate,
+                #     "This vehicle was involved in theft or possibly stolen",
+                #     params["file"],"location tbi",data["make"],
+                #     data["model"],data["color"]
+                # )
+                pass
+
+        serializer = VehicleSerializer(vehicles, many=True)
+        return serializer.data
+        
     
     @validate_params(["license_plate", "make", "model", "color", "file"])
     def camera_add_full(self, request, params=None, *args, **kwargs):
