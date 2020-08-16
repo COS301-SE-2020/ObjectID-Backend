@@ -98,7 +98,8 @@ class VehicleBase(ActionAPI):
             tracking_data = {
                 "vehicle": vehicle,
                 "date": datetime.now(),
-                "location": params.get("location", "No Location")
+                "lat": params.get("lat", None),
+                "long": params.get("long", None)
             }
 
             tracking_serializer = TrackingSerializer(data=tracking_data)
@@ -280,6 +281,13 @@ class VehicleBase(ActionAPI):
         temp.save()
         path = temp.image.path
 
+        tracking = {
+            "vehicle": None,
+            "date": datetime.now(),
+            "lat": params.get("lat", None),
+            "long": params.get("long", None)
+        }
+
         # TODO: Perhaps consider file size compression or file size too large returns
 
         regions = ['za'] # Change to your country
@@ -322,6 +330,10 @@ class VehicleBase(ActionAPI):
             serializer = VehicleSerializer(data=data)
             if serializer.is_valid():
                 vehicle = serializer.save()
+                tracking["vehicle"] = vehicle
+                tracking_serializer = TrackingSerializer(data=tracking)
+                if tracking_serializer.is_valid():
+                    tracking_serializer.save()
                 temp.vehicle = vehicle
                 temp.save()
                 return serializer.data
@@ -387,6 +399,10 @@ class VehicleBase(ActionAPI):
             
             if serializer.is_valid():
                 vehicle = serializer.save()
+                tracking["vehicle"] = vehicle
+                tracking_serializer = TrackingSerializer(data=tracking)
+                if tracking_serializer.is_valid():
+                    tracking_serializer.save()
                 vehicles.append(vehicle)
                 image_space.vehicle = vehicle
                 image_space.save()
@@ -448,7 +464,8 @@ class VehicleBase(ActionAPI):
                         "long": params.get("long", None)
                     }
                     tracking_serializer = TrackingSerializer(data=tracking_data)
-                    tracking_serializer.save()
+                    if tracking_serializer.is_valid():
+                        tracking_serializer.save()
 
                     image.vehicle = serializer.validated_data
                     image.save()
@@ -781,9 +798,31 @@ class VehicleBase(ActionAPI):
             
             return response
 
+    @validate_params(["license_plate"])
+    def get_vehicle_locations(self, request, params=None, *args, **kwargs):
+        
+        vehicles = Vehicle.objects.filter(license_plate=params["license_plate"])
 
-    
+        if vehicles.count() == 0:
+            return {
+                "success": False,
+                "message": "There are no vehicles with that license plate in the system"
+            }
 
+        payload = {}
+        for vehicle in vehicles:
+            tracking_data = vehicle.tracking.all()
+            tracking_serializer = TrackingSerializer(tracking_data, many=True)
+            temp_data = {
+                "vehicle_id": vehicle.id,
+                "license_plate": vehicle.license_plate,
+                "tracking": tracking_serializer.data
+            }
+            payload.append(temp_data)
+
+        return {
+            "payload": payload
+        }
 
             
 
