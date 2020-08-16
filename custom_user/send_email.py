@@ -14,5 +14,5 @@ def send(address,type):
 def flagged_notification(address,lic_plate,flag,image,location, make, model,color):
     server = email_to.EmailServer('smtp.gmail.com', 587, 'ctrl.intelligence@gmail.com', 'Ctrl+Intelligence312##')
     server.quick_email(address, "FLAGGED VEHICLE SPOTTED", ["WARNING " + address+ '.\n', "A " + color+" "+ make+" "+model+" with the numberplate "+lic_plate+" has been spotted on a camera at "
-        + location + " which is in your area, our system shows that this vehicle is " + flag+"./n", "Please take the nesscary and report the vehicle to the authorities if it is spotted. A snapshot of the vehicle is "+
+        + location + ", our system shows that this vehicle is " + flag+"./n", "Please take the nesscary and report the vehicle to the authorities if it is spotted. A snapshot of the vehicle is "+
         "attached to this email."])

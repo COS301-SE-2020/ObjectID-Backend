@@ -10,6 +10,7 @@ from .models import Vehicle, ImageSpace, MarkedVehicle
 from .serializers import VehicleSerializer, MarkedVehicleSerializer
 from .utils import check_for_mark, open_cam_rtsp, saps_API
 from tracking.serializers import TrackingSerializer
+from tracking.models import VehicleLog
 from tools.viewsets import ActionAPI, validate_params
 
 import cv2
@@ -444,14 +445,17 @@ class VehicleBase(ActionAPI):
         
         for vehicle in vehicles:
             if vehicle.saps_flagged:
-                # send_email.flagged_notification(
-                #     "stephendups@gmail.com",
-                #     plate,
-                #     "This vehicle was involved in theft or possibly stolen",
-                #     params["file"],"location tbi",data["make"],
-                #     data["model"],data["color"]
-                # )
-                pass
+
+                tracking_qs = VehicleLog.objects.filter(vehicle__id=vehicle.id).latest("id")
+                location = "Lat: {}, Long: {}".format(tracking_qs.lat, tracking_qs.long)
+                send_email.flagged_notification(
+                    request.user.email,
+                    vehicle.license_plate,
+                    "This vehicle was involved in theft or possibly stolen",
+                    params["file"], location, vehicle.make,
+                    vehicle.model, vehicle.color
+                )
+                
 
         serializer = VehicleSerializer(vehicles, many=True)
         return serializer.data
