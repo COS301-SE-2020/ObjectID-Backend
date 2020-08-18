@@ -27,3 +27,4 @@ ipython
 opencv-python
 opencv-contrib-python
 email_to
+tensorflow
