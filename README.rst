@@ -71,10 +71,12 @@ Moved to `Live reloading and SASS compilation`_.
 
 
 
-Deployment
+Technical_Installation_Manual
 ----------
 
-The following details how to deploy this application.
+https://drive.google.com/file/d/1vHkX7AUkQ25nHGlBGraC3zkmtZtfJ56u/view?usp=sharing
+
+
 
 
 
