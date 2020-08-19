@@ -74,7 +74,10 @@ Technical_Installation_Manual
 
 https://drive.google.com/file/d/1vHkX7AUkQ25nHGlBGraC3zkmtZtfJ56u/view?usp=sharing
 
+ObjectID Front-end link:
+----------
 
+https://github.com/COS301-SE-2020/Object-ID-Frontend
 
 
 
