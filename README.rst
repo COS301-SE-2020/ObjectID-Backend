@@ -74,6 +74,11 @@ Technical_Installation_Manual
 
 https://drive.google.com/file/d/1vHkX7AUkQ25nHGlBGraC3zkmtZtfJ56u/view?usp=sharing
 
+User Manual:
+----------
+
+https://www.overleaf.com/6343251583zgjzqxwkskzc
+
 ObjectID Front-end link:
 ----------
 
