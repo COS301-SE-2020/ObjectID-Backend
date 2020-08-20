@@ -66,7 +66,11 @@ Moved to `Live reloading and SASS compilation`_.
 .. _`Live reloading and SASS compilation`: http://cookiecutter-django.readthedocs.io/en/latest/live-reloading-and-sass-compilation.html
 
 
+Software Requirements Specification Document
+---------
 
+The SRS documnet for the ObjectID system can be found at:
+https://www.overleaf.com/read/jkftvtyxvbfr
 
 
 Technical_Installation_Manual
