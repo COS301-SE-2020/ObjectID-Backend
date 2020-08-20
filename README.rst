@@ -77,7 +77,7 @@ https://drive.google.com/file/d/1vHkX7AUkQ25nHGlBGraC3zkmtZtfJ56u/view?usp=shari
 User Manual:
 ----------
 
-https://www.overleaf.com/6343251583zgjzqxwkskzc
+https://www.overleaf.com/read/fxqswyzrhpkb
 
 ObjectID Front-end link:
 ----------
