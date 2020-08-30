@@ -94,6 +94,9 @@ class BusinessBase(ActionAPI):
         business = Business.objects.get(related_user=request.user)
         business.logo = params['file']
         business.save()
+        return {
+            "success": True
+        }
 
     def get_logo(self, request, params=None, *args, **kwargs):
         """
