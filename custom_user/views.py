@@ -18,6 +18,8 @@ from camera.serializers import (
     CameraSerializer
 )
 
+from custom_user import send_email
+
 class CustomUserBase(ActionAPI):
 
     permission_classes = [permissions.AllowAny, ]
