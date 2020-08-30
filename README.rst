@@ -1,8 +1,6 @@
 ObjectID
 ========
 
-Vehicle Identification project
-
 .. image:: https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg
      :target: https://github.com/pydanny/cookiecutter-django/
      :alt: Built with Cookiecutter Django
@@ -68,13 +66,27 @@ Moved to `Live reloading and SASS compilation`_.
 .. _`Live reloading and SASS compilation`: http://cookiecutter-django.readthedocs.io/en/latest/live-reloading-and-sass-compilation.html
 
 
+Software Requirements Specification Document
+---------
+
+The SRS documnet for the ObjectID system can be found at:
+https://www.overleaf.com/read/jkftvtyxvbfr
 
 
-
-Deployment
+Technical_Installation_Manual
 ----------
 
-The following details how to deploy this application.
+https://drive.google.com/file/d/1vHkX7AUkQ25nHGlBGraC3zkmtZtfJ56u/view?usp=sharing
+
+User Manual:
+----------
+
+https://www.overleaf.com/read/fxqswyzrhpkb
+
+ObjectID Front-end link:
+----------
+
+https://github.com/COS301-SE-2020/Object-ID-Frontend
 
 
 
