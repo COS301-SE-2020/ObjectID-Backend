@@ -113,3 +113,21 @@ class BusinessBase(ActionAPI):
             "success": False,
             "payload": serializer.errors
         }
+
+    def get_all_cameras(self, request, params=None, *args, **kwargs):
+        """
+        Returns all the cameras related to the business, less the manual upload one
+        """
+
+        camera_qs = Camera.objects.filter(owner=request.user)
+        #Exclude the manual image upload camera
+        camera_qs = camera_qs.exclude(name="Manual")
+
+        if camera_qs.count() > 0:
+            serializer = CameraSerializer(camera_qs, many=True)
+            return serializer.data
+        
+        return {
+            "success": False,
+            "message": "This business account has no cameras"
+        }
