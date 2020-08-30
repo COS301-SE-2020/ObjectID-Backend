@@ -15,6 +15,8 @@ from vehicle.utils import check_for_mark, saps_API
 from vehicle.serializers import VehicleSerializer, MarkedVehicleSerializer
 from tracking.serializers import TrackingSerializer
 
+from custom_user import send_email
+
 class CameraActions(ActionAPI):
 
     permission_classes = [permissions.AllowAny, ]
