@@ -96,6 +96,7 @@ LOCAL_APPS = [
     "vehicle.apps.VehicleConfig",
     "tracking.apps.TrackingConfig",
     "camera.apps.CameraConfig",
+    "custom_user.apps.CustomUserConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
