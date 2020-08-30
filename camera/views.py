@@ -43,7 +43,7 @@ class CameraActions(ActionAPI):
             "camera": camera
         }
 
-        res = None
+        res = []
 
         # Check if we have been provided with the license plate of the vehicle
         # If not get it
