@@ -3,6 +3,7 @@ import uuid
 from django.shortcuts import render
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
 
 from rest_framework import permissions
 
@@ -78,7 +79,36 @@ class BusinessBase(ActionAPI):
         business.name = params["name"]
         business.save()
 
-        return True
+        return {
+            "success": True
+        }
+
+    @validate_params(['file'])
+    def add_logo(self, request, params=None, *args, **kwargs):
+        """
+        Used to add or change the logo that the business has
+        """
+
+        business = Business.objects.get(related_user=request.user)
+        business.logo = params['file']
+        business.save()
+
+    def get_logo(self, request, params=None, *args, **kwargs):
+        """
+        Used to get the logo of the business
+        """
+
+        business = Business.objects.get(related_user=request.user)
+        path = business.logo.path
+
+        try:
+            with open(path, 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        except IOError:
+            return {
+                "success": False,
+                "message": "No logo set for the business"
+            }
 
     @validate_params(['name'])
     def add_camera(self, request, params=None, *args, **kwargs):
