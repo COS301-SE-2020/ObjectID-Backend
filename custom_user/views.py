@@ -166,3 +166,24 @@ class BusinessBase(ActionAPI):
             "success": False,
             "message": "This business account has no cameras"
         }
+
+    @validate_params(['unique_key'])
+    def edit_camera(self, request, params=None, *args, **kwargs):
+        
+        try:
+            camera = Camera.objects.get(unique_key=params["unique_key"])
+        except Camera.DoesNotExist:
+            return {
+                "success": False,
+                "message": "A camera with that key does not exist"
+            }
+
+        camera.name = params.get("name", camera.name)
+        camera.lat = params.get("lat", camera.lat)
+        camera.long = params.get("long", camera.long)
+        
+        camera.save()
+
+        serializer = CameraReturnSerializer(camera)
+
+        return serializer.data

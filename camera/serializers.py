@@ -5,7 +5,7 @@ from .models import Camera
 class CameraReturnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Camera
-        fields = ('lat', 'long', 'unique_key')
+        fields = ('lat', 'long', 'unique_key', 'name')
 
 class CameraSerializer(serializers.ModelSerializer):
     class Meta:
