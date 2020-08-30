@@ -12,6 +12,7 @@ from .utils import check_for_mark, open_cam_rtsp, saps_API
 from tracking.serializers import TrackingSerializer
 from tracking.models import VehicleLog
 from tools.viewsets import ActionAPI, validate_params
+from camera.models import Camera
 
 import cv2
 import os
@@ -278,6 +279,8 @@ class VehicleBase(ActionAPI):
         from lpr.lpr import check_image
         import json
 
+        camera = Camera.objects.get(owner=request.user, name="Manual")
+
         temp = ImageSpace(image=params['file'])
         temp.save()
         path = temp.image.path
@@ -286,7 +289,8 @@ class VehicleBase(ActionAPI):
             "vehicle": None,
             "date": datetime.now(),
             "lat": params.get("lat", 00.000000),
-            "long": params.get("long", 00.000000)
+            "long": params.get("long", 00.000000),
+            "camera": camera
         }
 
         # TODO: Perhaps consider file size compression or file size too large returns
