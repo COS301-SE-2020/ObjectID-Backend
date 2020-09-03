@@ -21,7 +21,7 @@ class DashBoardBase(ActionAPI):
     permission_classes = [permissions.IsAuthenticated, ]
 
     @validate_params(['unique_key'])
-    def get_single_camera_total(self, request, params=None, *args, **kwargs):
+    def get_single_camera_read_total(self, request, params=None, *args, **kwargs):
         """
         Used to get the total number of read a single cameras has made
         """
@@ -107,5 +107,37 @@ class DashBoardBase(ActionAPI):
             counter_array.append(temp_obj)
 
         return_dict["data"] = counter_array
+
+        return return_dict
+
+    def get_user_overview(self, request, params=None, *args, **kwargs):
+        """
+        Used to get a general overview of the user
+        """
+
+        user = request.user
+
+        cameras = user.cameras.all()
+
+        return_dict = {}
+
+        # Get the total number of cameras that the user has added
+        # -1 to exlucde the manual camera item
+        return_dict["camera_total"] = cameras.count() - 1
+
+        # Get the total number of saps flagged reads the user has
+        # NOTE: This may be wrong and would require going through each camera?
+        return_dict["total_saps_reads"] = cameras.tracking.all().filter(vehicle__saps_flagged=True).count()
+
+        # Get the number of vehicles that this user currently has marked
+        return_dict["marked_count"] = user.marked_vehicle.all().count()
+
+        # Get the total number of reads that this users cameras have made
+        return_dict["total_reads"] = cameras.tracking.all().count()
+
+        # Get the total number of manual uploads that this user has made
+        cam = cameras.filter(name="Manual")
+        cam = cam[0]
+        return_dict["total_manual_uploads"] = cam.tracking.all().count()
 
         return return_dict
