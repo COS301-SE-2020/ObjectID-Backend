@@ -157,3 +157,97 @@ Returns:
     ]
 }
 
+/api/v1/camera/add
+Expects:
+{
+    file : <file(image)>
+    key : <string>
+}
+
+Returns:
+{
+    success : <boolean>
+}
+
+/api/v1/camera/add
+Expects:
+{
+    file : <file(image)>
+    key : <string>
+}
+
+Returns:
+{
+    success : <boolean>
+}
+
+/api/v1/business/edit_business_name
+Expects:
+{
+    name : <string>
+    key : <string>
+}
+
+Returns:
+{
+    success : <boolean>
+}
+
+/api/v1/business/add_logo
+Expects:
+{
+    file : <file(image)>
+}
+
+Returns:
+{
+    success : <boolean>
+}
+
+/api/v1/business/get_logo
+Expects:
+{
+   
+}
+
+Returns:
+{
+    file : <file(image)>
+}
+
+/api/v1/business/add_camera
+*=optional
+Expects:
+{
+    name : <string>
+    *long : <double> #defaults to 0
+    *lat : <double>
+}
+
+Returns:
+{
+    success : <boolean>
+}
+
+/api/v1/business/get_all_cameras
+Expects:
+{
+    name : <string>
+    *long : <double> #defaults to 0
+    *lat : <double>
+}
+
+Returns:
+{
+    success : <boolean>
+}
+
+/api/v1/business/edit_camera
+
+/api/v1/dashboard/get_single_camera_read_total
+
+/api/v1/dashboard/get_all_camera_total
+
+/api/v1/dashboard/get_camera_history
+
+/api/v1/dashboard/get_user_overview
