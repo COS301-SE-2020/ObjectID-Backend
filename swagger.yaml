@@ -2,6 +2,7 @@ swagger: '2.0'
 info:
   description: |
     Documentation on ObjectID API Endpoints
+    '*' = Optional parameter
   version: 1.0.0
   title: ObjectID Backend API
   termsOfService: http://swagger.io/terms/
@@ -78,19 +79,273 @@ paths:
               enum:
               - and
               - or
+            filter:
+              type: object
+              properties:
+                make*:
+                  type: string
+                model*:
+                  type: string
+                color*:
+                  type: string
+                license_plate*:
+                  type: string
       responses:
         200:
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Pet'
-        400:
-          description: Invalid status value
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
+              $ref: '#/definitions/Vehicle'
+  /vehicle/search:
+    post:
+      tags:
+      - Vehicle
+      summary: search with keywords
+      description: Search for vehicles with a keyword
+      operationId: search
+      consumes:
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            search:
+              type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                $ref: '#/definitions/Vehicle'
+  /vehicle/file_recognize:
+    post:
+      tags:
+      - Vehicle
+      summary: Run recognition over an image
+      description: Run recognition over an uploaded image
+      operationId: file_recognize
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              enum:
+              - file
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                $ref: '#/definitions/Vehicle'
+  /vehicle/get_saps_flagged:
+    post:
+      tags:
+      - Vehicle
+      summary: Returns all saps flagged vehicles spotted
+      description: Returns all saps flagged vehicles spotted
+      operationId: get_saps_flagged
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: array
+                items:
+                  $ref: '#/definitions/Vehicle'
+  /vehicle/get_duplicates:
+    post:
+      tags:
+      - Vehicle
+      summary: Returns all duplicate vehicles spotted
+      description: Returns all duplicate vehicles spotted
+      operationId: get_duplicates
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: array
+                items:
+                  $ref: '#/definitions/Vehicle'
+  /vehicle/add_marked_vehicle:
+    post:
+      tags:
+      - Vehicle
+      summary: Flags a license_plate
+      description: Flags a license plate
+      operationId: add_marked_vehicle
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            license_plate:
+              type: string
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+  /vehicle/get_marked_vehicles:
+    post:
+      tags:
+      - Vehicle
+      summary: Returns all marked vehicles
+      description: Returns all marked vehicles
+      operationId: get_marked_vehicles
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: array
+                items:
+                  $ref: '#/definitions/Vehicle'
+  /vehicle/remove_marked_vehicle:
+    post:
+      tags:
+      - Vehicle
+      summary: Unflags a license_plate
+      description: Unflags a license plate
+      operationId: remove_marked_vehicle
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            license_plate:
+              type: string
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+  /vehicle/edit_vehicle:
+    post:
+      tags:
+      - Vehicle
+      summary: Edits a vehicle
+      description: Edits a vehicle
+      operationId: edit_vehicle
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            license_plate:
+              type: string
+            make*:
+              type: string
+            model*:
+              type: string
+            color*:
+              type: string
+            license_plate_duplicate*:
+              type: boolean
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                $ref: '#/definitions/Vehicle'
+  /vehicle/get_vehicle_locations:
+    post:
+      tags:
+      - Vehicle
+      summary: Get vehicle locations
+      description: Get vehicle locations
+      operationId: get_vehicle_locations
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            license_plate:
+              type: string
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    vehicle_id:
+                      type: number
+                    license_plate:
+                      type: string
+                    tracking:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          vehicle:
+                            type: number
+                          date:
+                            type: string
+                          lat:
+                            type: number
+                          long:
+                            type: number
+                          camera:
+                            type: number
   /pet/findByTags:
     get:
       tags:
