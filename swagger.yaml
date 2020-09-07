@@ -28,6 +28,8 @@ tags:
   #   url: http://swagger.io
 - name: business
   description: Business related operations
+- name: Dashboard
+  description: stats related endpoints
 # schemes:
 # - http
 paths:
@@ -346,6 +348,138 @@ paths:
                             type: number
                           camera:
                             type: number
+  /dashboard/get_single_camera_read_total:
+    post:
+      tags:
+      - Dashboard
+      summary: Get total reads for single camera
+      description: Get total reads for single camera
+      operationId: get_single_camera_read_total
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            unique_key:
+              type: string
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: number
+  /dashboard/get_all_camera_total:
+    post:
+      tags:
+      - Dashboard
+      summary: Get total reads for all cameras
+      description: Get total reads for all cameras
+      operationId: get_all_camera_total
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    owner:
+                      type: number
+                    lat:
+                      type: number
+                    long:
+                      type: number
+                    unique_key:
+                      type: string
+                    name:
+                      type: string
+                    total:
+                      type: number
+                    total_saps_reads:
+                      type: number
+  /dashboard/get_camera_history:
+    post:
+      tags:
+      - Dashboard
+      summary: get single cam history
+      description: get single cam history
+      operationId: get_camera_history
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            unique_key:
+              type: string
+            start*:
+              type: string
+              enum:
+              - "2020-01-31"
+            end*:
+              type: string
+              enum:
+              - "2020-01-31"
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                        count:
+                          type: number
+  /dashboard/get_user_overview:
+    post:
+      tags:
+      - Dashboard
+      summary: Get a user overview stat
+      description: Get a user overview
+      operationId: get_user_overview
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              payload:
+                type: object
+                properties:
+                  camera_total:
+                    type: number
+                  total_saps_reads:
+                    type: number
+                  marked_count:
+                    type: number
+                  total_reads:
+                    type: number
+                  total_manual_uploads:
+                    type: number
   /pet/findByTags:
     get:
       tags:
