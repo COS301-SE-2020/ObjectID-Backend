@@ -30,7 +30,7 @@ class CustomUserBase(ActionAPI):
 
         if form.is_valid():
             form.save()
-            send(params['email'], 1)
+            # send(params['email'], 1)
 
             # Create a blank business profile for that same user which will now be the
             # Owner of the business and the only user related to that business
