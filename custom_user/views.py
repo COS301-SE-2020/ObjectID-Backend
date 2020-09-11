@@ -131,7 +131,7 @@ class BusinessBase(ActionAPI):
 
 
         data = {
-            "owner": request.user,
+            "owner": request.user.id,
             "lat": params.get("lat", 0),
             "long": params.get("long", 0),
             "unique_key": key,

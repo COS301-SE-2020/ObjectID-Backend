@@ -99,10 +99,10 @@ class DashBoardBase(ActionAPI):
 
         # Create a temp array to hold the information of the date and count
         counter_array = []
-        for date in date_ranger(start, end):
+        for date_item in date_ranger(start, end):
             temp_obj = {
-                "date": datetime.strftime("%Y-%m-%d", date),
-                "count": tracking_qs.filter(date=date).count()
+                "date": datetime.strftime(date_item, "%Y-%m-%d"),
+                "count": tracking_qs.filter(date=date_item).count()
             }
             counter_array.append(temp_obj)
 
@@ -126,14 +126,19 @@ class DashBoardBase(ActionAPI):
         return_dict["camera_total"] = cameras.count() - 1
 
         # Get the total number of saps flagged reads the user has
-        # NOTE: This may be wrong and would require going through each camera?
-        return_dict["total_saps_reads"] = cameras.tracking.all().filter(vehicle__saps_flagged=True).count()
+        count = 0
+        for cam in cameras:
+            count += cam.tracking.all().filter(vehicle__saps_flagged=True).count()
+        return_dict["total_saps_reads"] = count
 
         # Get the number of vehicles that this user currently has marked
         return_dict["marked_count"] = user.marked_vehicle.all().count()
 
         # Get the total number of reads that this users cameras have made
-        return_dict["total_reads"] = cameras.tracking.all().count()
+        count = 0
+        for cam in cameras:
+            count += cam.tracking.all().count()
+        return_dict["total_reads"] = count
 
         # Get the total number of manual uploads that this user has made
         cam = cameras.filter(name="Manual")
