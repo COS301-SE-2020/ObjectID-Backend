@@ -85,3 +85,14 @@ class EmailEngine():
 
         self.server.quick_email(address, subject, message)
         return True
+
+    def send_custom_email(self, address, subject, message):
+        """
+        Send an email with a specified set of details
+        """
+
+        if not address or not subject or not message:
+            return False
+
+        self.server.quick_email(address, subject, message)
+        return True
