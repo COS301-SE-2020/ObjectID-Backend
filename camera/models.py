@@ -12,4 +12,4 @@ class Camera(models.Model):
     name = models.CharField(max_length=64)
 
     def __str__(self):
-        return "Camera: {}".format(self.owner.business.name)
+        return "Camera: {}".format(self.name)
