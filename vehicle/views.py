@@ -4,6 +4,7 @@ from django.shortcuts import render
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.http import HttpResponse
 from rest_framework import permissions, filters
 
 from .models import Vehicle, ImageSpace, MarkedVehicle
@@ -622,5 +623,30 @@ class VehicleBase(ActionAPI):
             "payload": payload
         }
 
+    @validate_params(["vehicle_id"])
+    def get_latest_vehicle_image(self, request, params=None, *args, **kwargs):
+        """
+        Get the latest vehicle image from vehicle id
+        """
+
+        image = ImageSpace.objects.filter(vehicle__id=params["vehicle_id"]).last("id")
+
+        if not image:
+            return {
+                "success": False,
+                "message": "There is no image for that vehicle ID"
+            }
+
+        path = image.image.path
+
+        try:
+            with open(path, 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        except IOError:
+            return {
+                "success": False,
+                "message": "Error opening vehicle image"
+            }
+        
             
 
