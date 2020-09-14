@@ -42,7 +42,7 @@ class CameraActions(ActionAPI):
             "date": datetime.now(),
             "lat": camera.lat,
             "long": camera.long,
-            "camera": camera
+            "camera": camera.id
         }
 
         res = []

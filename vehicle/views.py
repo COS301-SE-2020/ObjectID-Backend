@@ -288,9 +288,9 @@ class VehicleBase(ActionAPI):
         tracking = {
             "vehicle": None,
             "date": datetime.now(),
-            "lat": params.get("lat", 00.000000),
-            "long": params.get("long", 00.000000),
-            "camera": camera
+            "lat": float(params.get("lat", 00.000000)),
+            "long": float(params.get("long", 00.000000)),
+            "camera": camera.id
         }
 
         # TODO: Perhaps consider file size compression or file size too large returns
@@ -313,7 +313,7 @@ class VehicleBase(ActionAPI):
         res = res["results"]
 
         
-        if len(res) is 0:
+        if len(res) == 0:
             data = {
                 "license_plate": "",
                 "color": "tbi",
