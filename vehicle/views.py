@@ -449,16 +449,18 @@ class VehicleBase(ActionAPI):
         
         for vehicle in vehicles:
             if vehicle.saps_flagged:
-
-                tracking_qs = VehicleLog.objects.filter(vehicle__id=vehicle.id).latest("id")
-                location = "Lat: {}, Long: {}".format(tracking_qs.lat, tracking_qs.long)
-                send_email.flagged_notification(
-                    request.user.email,
-                    vehicle.license_plate,
-                    "this vehicle was involved in theft or possibly stolen",
-                    params["file"], location, vehicle.make,
-                    vehicle.model, vehicle.color
-                )
+                from email_engine import EmailEngine
+                engine = EmailEngine()
+                engine.send_saps_notifiation(request.user.email, vehicle)
+                # tracking_qs = VehicleLog.objects.filter(vehicle__id=vehicle.id).latest("id")
+                # location = "Lat: {}, Long: {}".format(tracking_qs.lat, tracking_qs.long)
+                # send_email.flagged_notification(
+                #     request.user.email,
+                #     vehicle.license_plate,
+                #     "this vehicle was involved in theft or possibly stolen",
+                #     params["file"], location, vehicle.make,
+                #     vehicle.model, vehicle.color
+                # )
                 
 
         serializer = VehicleSerializer(vehicles, many=True)
