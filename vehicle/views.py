@@ -629,7 +629,7 @@ class VehicleBase(ActionAPI):
         Get the latest vehicle image from vehicle id
         """
 
-        image = ImageSpace.objects.filter(vehicle__id=params["vehicle_id"]).last("id")
+        image = ImageSpace.objects.filter(vehicle__id=params["vehicle_id"]).last()
 
         if not image:
             return {
