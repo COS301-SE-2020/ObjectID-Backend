@@ -57,4 +57,12 @@ def make_model_detection(path):
     from make_model_classifier.detect import detect_make_model
     make_model = detect_make_model(path)
     return make_model
+
+def damage_detection(path):
+    from darknet_dmg import detect
+    
+    output = detect.detect(path)
+    print(output)
+    return output
+    #./darknet detector test data/obj.data cfg/yolov4-obj.cfg /mydrive/yolov4/backup/yolov4-obj_3000.weights /mydrive/images/car2.jpg -thresh 0.3
         

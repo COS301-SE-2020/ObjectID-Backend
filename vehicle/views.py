@@ -622,5 +622,14 @@ class VehicleBase(ActionAPI):
             "payload": payload
         }
 
+    def dmg_detect(self, request, params=None, *args, **kwargs):
+        from .utils import damage_detection
+        temp = ImageSpace(image=params['file'])
+        temp.save()
+        path = temp.image.path
+        output = damage_detection(path)
+        return True
+
+
             
 
