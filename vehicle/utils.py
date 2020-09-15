@@ -58,11 +58,29 @@ def make_model_detection(path):
     make_model = detect_make_model(path)
     return make_model
 
-def damage_detection(path):
+def damage_detection(vehicle):
     from darknet_dmg import detect
-    
+    frontPerc = 0
+    sidePerc = 0
+    rearPerc = 0
+    res = []
+    image = vehicle.images.all().last()
+    path = image.image.path
     output = detect.detect(path)
-    print(output)
-    return output
+    output = output.decode("utf-8")
+    side = output.find("side: ")
+    rear = output.find("rear: ")
+    front = output.find("front: ")
+    if front != -1:
+        res.append("Front")
+        #frontPerc = output[(front+7):(front+9)]
+    if side != -1:
+        res.append("Side")
+        #sidePerc = output[(front+6):(front+8)]
+    if rear != -1:
+        res.append("Rear")
+        #rearPerc = output[(front+6):(front+8)]
+        
+    return res
     #./darknet detector test data/obj.data cfg/yolov4-obj.cfg /mydrive/yolov4/backup/yolov4-obj_3000.weights /mydrive/images/car2.jpg -thresh 0.3
         

@@ -6,9 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from rest_framework import permissions, filters
 
-from .models import Vehicle, ImageSpace, MarkedVehicle
+from .models import Vehicle, ImageSpace, MarkedVehicle, Damage
 from .serializers import VehicleSerializer, MarkedVehicleSerializer
-from .utils import check_for_mark, open_cam_rtsp, saps_API
+from .utils import check_for_mark, open_cam_rtsp, saps_API, damage_detection
 from tracking.serializers import TrackingSerializer
 from tracking.models import VehicleLog
 from tools.viewsets import ActionAPI, validate_params
@@ -312,7 +312,7 @@ class VehicleBase(ActionAPI):
 
         res = res["results"]
 
-        
+        #if vehicle is missing numberplate
         if len(res) == 0:
             data = {
                 "license_plate": "",
@@ -341,6 +341,11 @@ class VehicleBase(ActionAPI):
                     tracking_serializer.save()
                 temp.vehicle = vehicle
                 temp.save()
+                
+                damage_array = damage_detection(vehicle)
+                for damage in damage_array:
+                    dmg_obj = Damage(vehicle=vehicle, location=damage)
+                    dmg_obj.save()
                 return serializer.data
 
         vehicle_data = []
@@ -461,6 +466,13 @@ class VehicleBase(ActionAPI):
                 #     params["file"], location, vehicle.make,
                 #     vehicle.model, vehicle.color
                 # )
+        # damage detection        
+        for vehicle in vehicles:
+            damage_array = damage_detection(vehicle)
+            for damage in damage_array:
+                dmg_obj = Damage(vehicle=vehicle.id, location=damage)
+                dmg_obj.save()
+
                 
 
         serializer = VehicleSerializer(vehicles, many=True)
@@ -621,15 +633,6 @@ class VehicleBase(ActionAPI):
         return {
             "payload": payload
         }
-
-    def dmg_detect(self, request, params=None, *args, **kwargs):
-        from .utils import damage_detection
-        temp = ImageSpace(image=params['file'])
-        temp.save()
-        path = temp.image.path
-        output = damage_detection(path)
-        return True
-
 
             
 
