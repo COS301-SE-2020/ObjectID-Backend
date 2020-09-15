@@ -16,7 +16,17 @@ class Vehicle(models.Model):
         return "{}: {} {}".format(self.model, self.license_plate, self.color)
 
 class DamageLocation(models.Model):
-    location = models.CharField(max_length=128)
+
+    FRONT = "FRONT"
+    REAR = "REAR"
+    SIDE = "SIDE"
+    location_choices = [
+        (FRONT, "Front"),
+        (REAR, "Rear"),
+        (SIDE, "Side"),
+    ]
+
+    location = models.CharField(max_length=128, choices=location_choices, default=None, null=True, blank=True)
 
     def __str__(self):
         return self.location
@@ -29,8 +39,9 @@ class DamageType(models.Model):
 
 class Damage(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='damage')
-    location = models.ForeignKey(DamageLocation, on_delete=models.CASCADE, related_name='damage')
-    type = models.ForeignKey(DamageType, on_delete=models.CASCADE, related_name='damage')
+    location = models.ForeignKey(DamageLocation, on_delete=models.CASCADE, related_name='damage', null=True, blank=True)
+    type = models.ForeignKey(DamageType, on_delete=models.CASCADE, related_name='damage', null=True, blank=True)
+    image = models.ImageField(upload_to='damage_vehicle/%Y/%m/%d/', null=True, blank=True, default=None)
 
     def __str__(self):
         return "{}: {} at {}".format(self.vehicle.license_plate, self.type.description, self.location.location)
