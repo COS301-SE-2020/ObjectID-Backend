@@ -105,21 +105,11 @@ After installation of docker use git to clone the repository where you want the 
 We also need to make sure that you have AI model weights. Since these are particularly large files you need to use git lfs.
 To install git lfs on Linux you can use:
 ::
-  $ sudo apt-get install git-lft
+  $ sudo apt-get install git-lfs
 
 Then to download the weights, from inside the repository location execute:
 ::
   $ git lfs pull
-
-
-Currently the SSL certificates are self-signed certificates linked to this repository and no domain.
-If you wish to change the certificate files do so by:
-- Rename your files in the following manner:
-::
-  objectid.crt
-  objectid.key
-
-- Replace the files located inside: `` /nginx/ ``
 
 Now that your SSL certificates are setup and your repo cloned you can spin up the instance simply by running:
 ::
@@ -180,3 +170,53 @@ Inside that file you will find something similar to:
 The area described by "some_hash" is the "admin_url"
 
 If you are directed to the Django admin panel and presented with a login screen you are ready to go.
+
+There are two way of stopping the system at this point:
+::
+     $ docker-compose down -v
+This stops the system but at the same time removes the volumes and deletes the built images meaning that you will need to use the "--build"
+flag when starting the system again
+
+::
+     $ docker-compose down
+This stops the system but does not remove the images and volumes meaning that to spin up the system again you will only need to execute:
+::
+     $ docker-compose up -d
+
+Updating a deployment:
+----------
+Updating the deployment is easy. Firstly run:
+::
+     $ git pull
+This will get you the new code base and then you can simply re-launch the Django image without a rebuild to have the new code:
+::
+     $ docker-compose up -d web
+
+Configuring a deployment:
+----------
+## SSL:
+Currently the SSL certificates are self-signed certificates linked to this repository and no domain.
+If you wish to change the certificate files do so by:
+
+- Rename your files in the following manner:
+::
+  objectid.crt
+  objectid.key
+
+- Replace the files located inside: `` /nginx/ ``
+
+## Domains:
+To configure the system to run on your domain you need to update the file location inside:
+::
+     /nginx/nginx.conf
+To configure your domains you must change the conf file to match your domain name.
+To put it simply that means changing the lines that say:
+::
+     server_name localhost;
+To your domain. i.e:
+::
+     server_name <domain_name>;
+
+To make these changes take effect simply execute:
+::
+     $ docker-compose up -d nginx
