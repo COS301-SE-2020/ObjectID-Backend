@@ -2,17 +2,51 @@ version: '3'
 
 services:
   db:
-    image: postgres
+    build:
+      context: .
+      dockerfile: ./db_compose/Dockerfile
     environment:
-    - POSTGRES_DB=postgres
+    - POSTGRES_DB=objectid
     - POSTGRES_USER=postgres
-    - POTSGRES_PASSWORD=admin
+    - POSTGRES_PASSWORD=admin
+    - POSTGRES_HOST=postgres
+    - POSTGRES_PORT=5432
+    # ports:
+      # - "5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - prod_postgres_data:/var/lib/postgresql/data
+      - prod_data_backups:/backups
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    # command: python manage.py runserver 0.0.0.0:8000
+    # command: gunicorn --certfile=/code/nginx/objectid.crt --keyfile=/code/nginx/objectid.key config.wsgi:application --bind 0.0.0.0:443
     volumes:
       - .:/code
-    ports:
-      - "8000:8000"
+      # - objectid/static:/code/static
+    expose:
+      - 443
     depends_on:
       - db
+      - redis
+    env_file:
+      - ./.envs/.django
+    command: /start
+    # ports:
+      # - "8000:8000"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      # - ./nginx/:/etc/nginx/conf.d
+      - ./nginx:/etc/nginx
+    depends_on:
+      - web
+  redis:
+    image: redis:5.0
+volumes:
+  prod_postgres_data: {}
+  prod_data_backups: {}

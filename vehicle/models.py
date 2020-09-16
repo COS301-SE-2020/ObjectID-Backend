@@ -15,11 +15,6 @@ class Vehicle(models.Model):
     def __str__(self):
         return "{}: {} {}".format(self.model, self.license_plate, self.color)
 
-class DamageLocation(models.Model):
-    location = models.CharField(max_length=128)
-
-    def __str__(self):
-        return self.location
 
 class DamageType(models.Model):
     description = models.CharField(max_length=128)
@@ -28,16 +23,26 @@ class DamageType(models.Model):
         return self.description
 
 class Damage(models.Model):
+    FRONT = "FRONT"
+    REAR = "REAR"
+    SIDE = "SIDE"
+    location_choices = [
+        (FRONT, "Front"),
+        (REAR, "Rear"),
+        (SIDE, "Side"),
+    ]
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='damage')
-    location = models.ForeignKey(DamageLocation, on_delete=models.CASCADE, related_name='damage')
-    type = models.ForeignKey(DamageType, on_delete=models.CASCADE, related_name='damage')
+    location = models.CharField(max_length=128, choices=location_choices, default=None, null=True, blank=True)
+    type = models.ForeignKey(DamageType, on_delete=models.CASCADE, related_name='damage', null=True, blank=True)
+    image = models.ImageField(upload_to='damage_vehicle/%Y/%m/%d/', null=True, blank=True, default=None)
 
     def __str__(self):
-        return "{}: {} at {}".format(self.vehicle.license_plate, self.type.description, self.location.location)
+        return "{}: at {}".format(self.vehicle.license_plate, self.location)
 
 class ImageSpace(models.Model):
     image = models.ImageField(upload_to='vehicles/%Y/%m/%d/')
-    vehicle = models.ForeignKey(Vehicle, null=True, blank=True, on_delete=models.CASCADE)
+    vehicle = models.ForeignKey(Vehicle, null=True, blank=True, on_delete=models.CASCADE, related_name="images")
 
 class MarkedVehicle(models.Model):
     license_plate = models.CharField(max_length=10)
