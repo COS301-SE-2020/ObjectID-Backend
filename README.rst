@@ -102,6 +102,15 @@ After installation of docker use git to clone the repository where you want the 
 ::
   $ git clone <git_repo_url>
 
+We also need to make sure that you have AI model weights. Since these are particularly large files you need to use git lfs.
+To install git lfs on Linux you can use:
+::
+  $ sudo apt-get install git-lft
+
+Then to download the weights, from inside the repository location execute:
+::
+  $ git lfs pull
+
 
 Currently the SSL certificates are self-signed certificates linked to this repository and no domain.
 If you wish to change the certificate files do so by:
@@ -125,7 +134,7 @@ If this is your first time running the system there is a bit more setup required
 First we must check that the correct database exists:
 To check execute:
 ::
-  $docker logs db
+  $ docker-compose logs db
 
 If you see the following message:
 ::
