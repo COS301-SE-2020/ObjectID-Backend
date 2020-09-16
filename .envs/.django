@@ -33,7 +33,7 @@ REDIS_URL=redis://redis:6379/0
 
 # PostgreSQL
 # ------------------------------------------------------------------------------
-POSTGRES_HOST=postgres
+POSTGRES_HOST=db
 POSTGRES_PORT=5432
 POSTGRES_DB=objectid
 POSTGRES_USER=postgres
