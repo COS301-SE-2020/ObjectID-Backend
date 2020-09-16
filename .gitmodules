@@ -1,0 +1,3 @@
+[submodule "Object-ID-Frontend"]
+	path = Object-ID-Frontend
+	url = git@github.com:COS301-SE-2020/Object-ID-Frontend.git
