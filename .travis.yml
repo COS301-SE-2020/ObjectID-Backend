@@ -5,7 +5,7 @@ services:
   - docker
 # command to install dependencies
 install:
-  $ docker-compose up -d --build
+  - docker-compose up -d --build
 # command to run tests
 script:
   - python manage.py test
