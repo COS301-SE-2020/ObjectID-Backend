@@ -98,23 +98,23 @@ https://docs.docker.com/get-docker/
 https://docs.docker.com/compose/install/
 
 After installation of docker use git to clone the repository where you want the volumes to be installed:
-```
+``
 git clone <git_repo_url>
-```
+``
 
 Currently the SSL certificates are self-signed certificates linked to this repository and no domain.
 If you wish to change the certificate files do so by:
 - Rename your files in the following manner:
-```
+``
 objectid.crt
 objectid.key
-```
+``
 - Replace the files located inside: ``` /nginx/ ```
 
 Now that your SSL certificates are setup and your repo cloned you can spin up the instance simply by running:
-```
+``
 docker-compose up -d --build
-```
+``
 This uses docker-compose to build multiple images configuring your instance to run as needed.
 "up" tells docker-compose to spin up the instances
 "-d" tells docker-compose to run the instances in detached mode allowing for you to resume terminal control after the spin up
@@ -123,15 +123,15 @@ This uses docker-compose to build multiple images configuring your instance to r
 If this is your first time running the system there is a bit more setup required.
 First we must check that the correct database exists:
 To check execute:
-```
+``
 docker logs db
-```
+``
 If you see the following message:
-```
+``
 [FATAL]: Database 'objectid' does not exist
-```
+``
 Then the database does not exist so we must create it by doing the following:
-```
+``
  docker-compose exec db sh
  su - postgres
  psql
@@ -139,35 +139,35 @@ Then the database does not exist so we must create it by doing the following:
  \q
  logout
  logout
- ```
+ ``
 
  Now our database has been created.
  Now we must check the django instance to see if it has spun up correctly.
  Let's do this by creating a super user that will allow you to connect to the admin panel.
  Execute:
- ```
+ ``
  docker-compose exec web python /code/manage.py createsuperuser
- ```
+ ``
  This should prompt you to create a user.
  If an error is thrown it means that our Django instance has not migrated or spun up correctly.
  To fix this execute:
- ```
+ ``
  docker-compose up -d web
- ```
+ ``
  This tells docker-compose to relaunch the Django instance.
 
  Now execute the "createsuperuser" command again and follow the prompts.
 
  If everything has worked you should be able to goto the following address:
- ```
+ ``
  localhost/<admin_url>
- ```
+ ``
 
  Where <admin_url> is replaced by the admin URL described in the /.envs/.django file.
  Inside that file you will find something similar to:
- ```
+ ``
  DJANGO_ADMIN_URL=some_hash/
- ```
+ ``
  The area described by "some_hash" is the "admin_url"
 
  If you are directed to the Django admin panel and presented with a login screen you are ready to go.
