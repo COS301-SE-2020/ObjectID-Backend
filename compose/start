@@ -6,4 +6,5 @@ set -o nounset
 
 
 python /code/manage.py collectstatic --noinput
+python /code/manage.py migrate
 /usr/local/bin/gunicorn --certfile=/code/nginx/objectid.crt --keyfile=/code/nginx/objectid.key config.wsgi:application --bind 0.0.0.0:443 --chdir=/code
