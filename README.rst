@@ -123,51 +123,50 @@ This uses docker-compose to build multiple images configuring your instance to r
 If this is your first time running the system there is a bit more setup required.
 First we must check that the correct database exists:
 To check execute:
-``
-docker logs db
-``
+::
+  $docker logs db
+
 If you see the following message:
-``
-[FATAL]: Database 'objectid' does not exist
-``
+::
+  [FATAL]: Database 'objectid' does not exist
+
 Then the database does not exist so we must create it by doing the following:
-``
- docker-compose exec db sh
- su - postgres
- psql
- CREATE DATABASE objectid;
- \q
- logout
- logout
- ``
+::
+  $ docker-compose exec db sh
+  $ su - postgres
+  $ psql
+  $ CREATE DATABASE objectid;
+  $ \q
+  $ logout
+  $ logout
 
- Now our database has been created.
- Now we must check the django instance to see if it has spun up correctly.
- Let's do this by creating a super user that will allow you to connect to the admin panel.
- Execute:
- ``
- docker-compose exec web python /code/manage.py createsuperuser
- ``
- This should prompt you to create a user.
- If an error is thrown it means that our Django instance has not migrated or spun up correctly.
- To fix this execute:
- ``
- docker-compose up -d web
- ``
- This tells docker-compose to relaunch the Django instance.
 
- Now execute the "createsuperuser" command again and follow the prompts.
+Now our database has been created.
+Now we must check the django instance to see if it has spun up correctly.
+Let's do this by creating a super user that will allow you to connect to the admin panel.
+Execute:
+::
+  $ docker-compose exec web python /code/manage.py createsuperuser
 
- If everything has worked you should be able to goto the following address:
- ``
- localhost/<admin_url>
- ``
+This should prompt you to create a user.
+If an error is thrown it means that our Django instance has not migrated or spun up correctly.
+To fix this execute:
+::
+  $ docker-compose up -d web
 
- Where <admin_url> is replaced by the admin URL described in the /.envs/.django file.
- Inside that file you will find something similar to:
- ``
- DJANGO_ADMIN_URL=some_hash/
- ``
- The area described by "some_hash" is the "admin_url"
+This tells docker-compose to relaunch the Django instance.
 
- If you are directed to the Django admin panel and presented with a login screen you are ready to go.
+Now execute the "createsuperuser" command again and follow the prompts.
+
+If everything has worked you should be able to goto the following address:
+::
+  $ localhost/<admin_url>
+
+Where <admin_url> is replaced by the admin URL described in the /.envs/.django file.
+Inside that file you will find something similar to:
+::
+  $ DJANGO_ADMIN_URL=some_hash/
+
+The area described by "some_hash" is the "admin_url"
+
+If you are directed to the Django admin panel and presented with a login screen you are ready to go.
