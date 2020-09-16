@@ -47,6 +47,16 @@ services:
       - web
   redis:
     image: redis:5.0
+  frontend:
+    build:
+      context: ./Object-ID-Frontend
+      dockerfile: Dockerfile
+    expose:
+      - "420"
+    deploy:
+      resources:
+        limits:
+          memory: 3072M
 volumes:
   prod_postgres_data: {}
   prod_data_backups: {}
