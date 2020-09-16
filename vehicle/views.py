@@ -7,9 +7,9 @@ from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import permissions, filters
 
-from .models import Vehicle, ImageSpace, MarkedVehicle
+from .models import Vehicle, ImageSpace, MarkedVehicle, Damage
 from .serializers import VehicleSerializer, MarkedVehicleSerializer
-from .utils import check_for_mark, open_cam_rtsp, saps_API
+from .utils import check_for_mark, open_cam_rtsp, saps_API, damage_detection
 from tracking.serializers import TrackingSerializer
 from tracking.models import VehicleLog
 from tools.viewsets import ActionAPI, validate_params
@@ -78,7 +78,7 @@ class VehicleBase(ActionAPI):
 
                 serializer = VehicleSerializer(data=data)
                 if serializer.is_valid():
-                    serializer.save()
+                    vehicle = serializer.save()
                     tracking_data = {
                         "vehicle": serializer.data.get("id"),
                         "date": datetime.now(),
@@ -88,6 +88,10 @@ class VehicleBase(ActionAPI):
                     tracking_serializer = TrackingSerializer(data=tracking_data)
                     if tracking_serializer.is_valid():
                         tracking_serializer.save()
+                    #adding damage
+                    if params["damage"]:
+                        dmg_obj = Damage(vehicle=vehicle, location=params.get("damage",None))
+                        dmg_obj.save()
                     return {
                         "success": True,
                         "duplicate": True,
@@ -108,6 +112,10 @@ class VehicleBase(ActionAPI):
             tracking_serializer = TrackingSerializer(data=tracking_data)
             if (tracking_serializer.is_valid()):
                 tracking_serializer.save()
+            #adding damage
+            if params["damage"]:
+                dmg_obj = Damage(vehicle=vehicle, location=params.get("damage",None))
+                dmg_obj.save()
 
             return {
                 "success": True,
@@ -126,7 +134,7 @@ class VehicleBase(ActionAPI):
 
         serializer = VehicleSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            vehicle = serializer.save()
 
             tracking_data = {
                 "vehicle": serializer.data.get("id"),
@@ -137,6 +145,11 @@ class VehicleBase(ActionAPI):
             tracking_serializer = TrackingSerializer(data=tracking_data)
             if tracking_serializer.is_valid():
                 tracking_serializer.save()
+
+            #adding damage
+            if params["damage"]:
+                dmg_obj = Damage(vehicle=vehicle, location=params.get("damage",None))
+                dmg_obj.save()
 
             return serializer.data
         data = {
@@ -171,6 +184,7 @@ class VehicleBase(ActionAPI):
             color = filters_param.get('color', None)
             saps_flagged = filters_param.get('saps_flagged', None)
             license_plate_duplicate = filters_param.get('license_plate_duplicate', None)
+            damage = filters_param.get('damage', None)
 
             if license_plate:
                 queryset = queryset.filter(license_plate=license_plate)
@@ -189,6 +203,9 @@ class VehicleBase(ActionAPI):
 
             if license_plate_duplicate:
                 queryset = queryset.filter(license_plate_duplicate=license_plate_duplicate)
+
+            if damage:
+                queryset = queryset.filter(damage__location__icontains=damage)
 
             if queryset.count() == 0:
                 return {
@@ -210,6 +227,7 @@ class VehicleBase(ActionAPI):
             color = filters_param.get('color', None)
             saps_flagged = filters_param.get('saps_flagged', None)
             license_plate_duplicate = filters_param.get('license_plate_duplicate', None)
+            damage = filters_param.get('damage', None)
 
             if license_plate:
                 queryset |= Vehicle.objects.filter(license_plate=license_plate)
@@ -223,7 +241,8 @@ class VehicleBase(ActionAPI):
                 queryset |= Vehicle.objects.filter(saps_flagged=saps_flagged)
             if license_plate_duplicate:
                 queryset |= Vehicle.objects.filter(license_plate_duplicate=license_plate_duplicate)
-
+            if damage:
+                queryset |= Vehicle.objects.filter(damage__location__icontains=damage)
             if queryset.count() == 0:
                 return {
                     "success": False,
@@ -259,7 +278,8 @@ class VehicleBase(ActionAPI):
             Q(license_plate__icontains=word_match) |
             Q(make__icontains=word_match) |
             Q(model__icontains=word_match) |
-            Q(color__icontains=word_match)
+            Q(color__icontains=word_match) |
+            Q(damage__location__icontains=word_match)
         )
 
         if queryset.count() == 0:
@@ -313,7 +333,7 @@ class VehicleBase(ActionAPI):
 
         res = res["results"]
 
-        
+        #if vehicle is missing numberplate
         if len(res) == 0:
             data = {
                 "license_plate": "",
@@ -342,6 +362,11 @@ class VehicleBase(ActionAPI):
                     tracking_serializer.save()
                 temp.vehicle = vehicle
                 temp.save()
+                
+                damage_array = damage_detection(vehicle)
+                for damage in damage_array:
+                    dmg_obj = Damage(vehicle=vehicle, location=damage)
+                    dmg_obj.save()
                 return serializer.data
 
         vehicle_data = []
@@ -462,6 +487,13 @@ class VehicleBase(ActionAPI):
                 #     params["file"], location, vehicle.make,
                 #     vehicle.model, vehicle.color
                 # )
+        # damage detection        
+        for vehicle in vehicles:
+            damage_array = damage_detection(vehicle)
+            for damage in damage_array:
+                dmg_obj = Damage(vehicle=vehicle.id, location=damage)
+                dmg_obj.save()
+
                 
 
         serializer = VehicleSerializer(vehicles, many=True)
@@ -623,6 +655,25 @@ class VehicleBase(ActionAPI):
             "payload": payload
         }
 
+    @validate_params(["license_plate"])
+    def get_vehicle_damage(self, request, params=None, *args, **kwargs):
+        from .serializers import DamagedVehicleSerializer
+        vehicles = Vehicle.objects.filter(license_plate__iexact=params["license_plate"])
+
+        if vehicles.count() == 0:
+            return {
+                "success": False,
+                "message": "There are no vehicles with that license plate in the system"
+            }
+        
+        payload = []
+        for vehicle in vehicles:
+            damage = vehicle.damage.all()
+        damage_serializer = DamagedVehicleSerializer(damage, many=True)
+        return {
+            "payload": damage_serializer.data
+        }
+
     @validate_params(["vehicle_id"])
     def get_latest_vehicle_image(self, request, params=None, *args, **kwargs):
         """
@@ -647,6 +698,4 @@ class VehicleBase(ActionAPI):
                 "success": False,
                 "message": "Error opening vehicle image"
             }
-        
-            
-
+       
