@@ -3,10 +3,9 @@ python:
   - "3.8"
 services:
   - docker
-  - postgreSQL
 # command to install dependencies
 install:
-  - pip install -r requirements/base.txt
+  $ docker-compose up -d --build
 # command to run tests
 script:
   - pytest
