@@ -15,7 +15,7 @@ from tracking.models import VehicleLog
 from tools.viewsets import ActionAPI, validate_params
 from camera.models import Camera
 
-import cv2
+# import cv2
 import os
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile

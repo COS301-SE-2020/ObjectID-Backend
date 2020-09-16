@@ -1,0 +1,40 @@
+# General
+# ------------------------------------------------------------------------------
+# DJANGO_READ_DOT_ENV_FILE=True
+DJANGO_SETTINGS_MODULE=config.settings.production
+DJANGO_SECRET_KEY=Y9fqPGtSLl85ebICnZh0r3MT12FzgVG9Cg6zlukxZeF4AtBFPcL4TvO01cefpugL
+DJANGO_ADMIN_URL=Z4WLU5tbtIbItQQKPQP7p2UiikcfMpRs/
+#DJANGO_ALLOWED_HOSTS=*
+DATABASE_URL=host.docker.internal
+
+# Security
+# ------------------------------------------------------------------------------
+# TIP: better off using DNS, however, redirect is OK too
+DJANGO_SECURE_SSL_REDIRECT=False
+
+# Email
+# ------------------------------------------------------------------------------
+# DJANGO_SERVER_EMAIL=
+
+# MAILGUN_API_KEY=
+# MAILGUN_DOMAIN=
+
+
+# django-allauth
+# ------------------------------------------------------------------------------
+DJANGO_ACCOUNT_ALLOW_REGISTRATION=True
+
+# Gunicorn
+# ------------------------------------------------------------------------------
+WEB_CONCURRENCY=4
+
+
+REDIS_URL=redis://redis:6379/0
+
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_DB=objectid
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=admin
