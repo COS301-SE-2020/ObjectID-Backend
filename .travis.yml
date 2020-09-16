@@ -8,4 +8,4 @@ install:
   $ docker-compose up -d --build
 # command to run tests
 script:
-  - pytest
+  - python manage.py test
