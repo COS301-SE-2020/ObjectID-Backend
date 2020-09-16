@@ -76,7 +76,7 @@ https://www.overleaf.com/read/jkftvtyxvbfr
 Technical_Installation_Manual
 ----------
 
-https://drive.google.com/file/d/1vHkX7AUkQ25nHGlBGraC3zkmtZtfJ56u/view?usp=sharing
+https://drive.google.com/file/d/1uQm2RkXZDLwHv0GS1vLEEMzHtZE-1YR1/view?usp=sharing
 
 User Manual:
 ----------
