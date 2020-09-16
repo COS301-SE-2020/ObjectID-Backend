@@ -94,27 +94,28 @@ Deployment To Production:
 Deployment to production has been made as easy as possible by use of Docker and docker-compose.
 
 Ensure that you have Docker and docker-compose installed on your system:
+
 https://docs.docker.com/get-docker/
 https://docs.docker.com/compose/install/
 
 After installation of docker use git to clone the repository where you want the volumes to be installed:
-``
-git clone <git_repo_url>
-``
+::
+  $ git clone <git_repo_url>
+
 
 Currently the SSL certificates are self-signed certificates linked to this repository and no domain.
 If you wish to change the certificate files do so by:
 - Rename your files in the following manner:
-``
-objectid.crt
-objectid.key
-``
-- Replace the files located inside: ``` /nginx/ ```
+::
+  objectid.crt
+  objectid.key
+
+- Replace the files located inside: `` /nginx/ ``
 
 Now that your SSL certificates are setup and your repo cloned you can spin up the instance simply by running:
-``
-docker-compose up -d --build
-``
+::
+  $ docker-compose up -d --build
+
 This uses docker-compose to build multiple images configuring your instance to run as needed.
 "up" tells docker-compose to spin up the instances
 "-d" tells docker-compose to run the instances in detached mode allowing for you to resume terminal control after the spin up
