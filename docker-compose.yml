@@ -53,7 +53,10 @@ services:
       dockerfile: Dockerfile
     expose:
       - "420"
-    memory: 3000m
+    deploy:
+      resources:
+        limits:
+          memory: 3072M
 volumes:
   prod_postgres_data: {}
   prod_data_backups: {}
