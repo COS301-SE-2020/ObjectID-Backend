@@ -4,3 +4,4 @@ __pycache__/*
 objectid/media/*
 */secrets.py
 *.weights
+/staticfiles/*

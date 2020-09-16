@@ -1,5 +1,5 @@
 import email_to
-import custom_user.secrets as secrets
+# import custom_user.secrets as secrets
 
 def send(address,type):
     server = email_to.EmailServer('smtp.gmail.com', 587, 'ctrl.intelligence@gmail.com', secrets.email_password)
