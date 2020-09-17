@@ -91,7 +91,7 @@ https://github.com/COS301-SE-2020/Object-ID-Frontend
 Testing Policy:
 ----------
 
-https://drive.google.com/file/d/1g-ldR6ConhshvPLKIEt_dv2qH86odH9i/view?usp=sharing
+https://drive.google.com/file/d/1IjHSEzLkrTo9t98l5Vown3-w8pvmaby4/view?usp=sharing
 
 Postman Tests:
 ----------
