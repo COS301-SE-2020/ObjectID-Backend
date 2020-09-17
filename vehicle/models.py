@@ -47,3 +47,4 @@ class ImageSpace(models.Model):
 class MarkedVehicle(models.Model):
     license_plate = models.CharField(max_length=10)
     marked_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='marked_vehicle')
+    reason = models.TextField(default=None, blank=True, null=True)

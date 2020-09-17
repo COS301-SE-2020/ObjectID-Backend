@@ -525,7 +525,7 @@ class VehicleBase(ActionAPI):
         return serializer.data
 
 
-    @validate_params(['license_plate'])
+    @validate_params(['license_plate', 'reason'])
     def add_marked_vehicle(self, request, params=None, *args, **kwargs):
         """
         Used to add a marked vehicle
@@ -533,7 +533,8 @@ class VehicleBase(ActionAPI):
 
         data = {
             "license_plate": params['license_plate'],
-            "marked_by": request.user.id
+            "marked_by": request.user.id,
+            "reason": params["reason"],
         }
 
 
