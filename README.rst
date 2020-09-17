@@ -88,6 +88,16 @@ ObjectID Front-end link:
 
 https://github.com/COS301-SE-2020/Object-ID-Frontend
 
+Testing Policy:
+----------
+
+https://drive.google.com/file/d/1g-ldR6ConhshvPLKIEt_dv2qH86odH9i/view?usp=sharing
+
+Postman Tests:
+----------
+
+https://drive.google.com/file/d/1SiLnPqtZqNCDNEja1fGKKERlk57hUAam/view?usp=sharing
+
 Deployment To Production:
 ----------
 
