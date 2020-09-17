@@ -434,8 +434,9 @@ class VehicleBase(ActionAPI):
                         tracking_serializer = TrackingSerializer(data=tracking)
                         if tracking_serializer.is_valid():
                             tracking_serializer.save()
-                        image_space.vehicle = duplicate_item
-                        image_space.save()
+                            image_space.vehicle = duplicate_item
+                            image_space.save()
+                            return tracking_serializer.data
                     else:
                         duplicate_item.license_plate_duplicate = True
                         duplicate_item.save()
