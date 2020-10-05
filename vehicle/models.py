@@ -4,12 +4,12 @@ from django.contrib.auth import get_user_model
 # Create your models here.
 
 class Vehicle(models.Model):
-    license_plate = models.CharField(max_length=10, blank=True)
-    make = models.CharField(max_length=64)
-    model = models.CharField(max_length=64)
-    color = models.CharField(max_length=32) # TODO: Consider making this a Foreign key for set values?
-    saps_flagged = models.BooleanField(default=False)
-    license_plate_duplicate = models.BooleanField(default=False)
+    license_plate = models.CharField(max_length=10, blank=True, null=True)
+    make = models.CharField(max_length=64, blank=True, null=True)
+    model = models.CharField(max_length=64, blank=True, null=True)
+    color = models.CharField(max_length=32, blank=True, null=True) # TODO: Consider making this a Foreign key for set values?
+    saps_flagged = models.BooleanField(default=False, blank=True, null=True)
+    license_plate_duplicate = models.BooleanField(default=False, blank=True, null=True)
     
 
     def __str__(self):

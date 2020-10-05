@@ -32,3 +32,5 @@ opencv-contrib-python
 email_to
 tensorflow
 django-rest-passwordreset
+
+celery

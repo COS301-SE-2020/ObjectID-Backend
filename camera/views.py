@@ -7,7 +7,8 @@ from rest_framework import permissions
 
 from tools.viewsets import ActionAPI, validate_params
 from .models import Camera
-from vehicle.models import Vehicle, ImageSpace
+from .tasks import vehicle_detection
+from vehicle.models import Vehicle, ImageSpace, Accuracy
 from tracking.models import VehicleLog
 
 from vehicle.utils import check_for_mark, saps_API
@@ -35,73 +36,46 @@ class CameraActions(ActionAPI):
         image_space = ImageSpace(image=params["file"])
         image_space.save()
 
-        path = image_space.image.path
-        
-        tracking = {
-            "vehicle": None,
-            "date": datetime.now(),
-            "lat": camera.lat,
-            "long": camera.long,
-            "camera": camera.id
-        }
-
-        res = []
-
-        # Check if we have been provided with the license plate of the vehicle
-        # If not get it
-        if not params.get("license_plate", None):
-
-            regions = ['za'] # Change to your country
-            with open(path, 'rb') as fp:
-                response = requests.post(
-                'https://api.platerecognizer.com/v1/plate-reader/',
-                data=dict(regions=regions),  # Optional
-                files=dict(upload=fp),
-                headers={'Authorization': 'token 8e744c1226777aa96d25e06807b69cbfc03f4c72'})
-            res = response.json()
-            
-            if res.get("error", None):
-                return {
-                    "success": False,
-                    "message": "Invalid file"
-                }
-
-            res = res["results"]
-        
-        if len(res) > 0:
-            special_plate = res[0]['plate']
-        else:
-            special_plate = ""
-
+        # Create an empty vehicle object to be used later with celery
         data = {
-            "license_plate": params.get("license_plate", special_plate),
+            "license_plate": params.get("license_plate", None),
             "color": params.get("color", None),
             "make": params.get("make", None),
             "model": params.get("model", None),
             "saps_flagged": False,
             "license_plate_duplicate": False
         }
+        temp_vehicle = Vehicle.objects.create(
+            license_plate=data["license_plate"],
+            color=data["color"],
+            make=data["make"],
+            model=data["model"],
+        )
 
-        # If we have the plate check if it has been marked by anyone
-        if data["license_plate"] is not None and data["license_plate"] != "":
-            check_for_mark(data["license_plate"])
+        path = image_space.image.path
         
-        # Do the color checking and fetching
-        if not data["color"]:
-            from vehicle.utils import colour_detection
-            bytes_ret = colour_detection(path)
-            data["color"] = bytes_ret.decode("utf-8")
-        
-        # Do the make and model checking and fetching
-        if not data["make"]:
-            from vehicle.utils import make_model_detection
-            bytes_ret = make_model_detection(path)
-            bytes_ret = bytes_ret.decode("utf-8").split(":")
-            data["model"] = bytes_ret[0]
-            data["make"] = bytes_ret[1]
+        tracking = {
+            "vehicle": temp_vehicle.id,
+            "date": datetime.now(),
+            "lat": camera.lat,
+            "long": camera.long,
+            "camera": camera.id
+        }
+
+        image_space.vehicle = temp_vehicle
+        image_space.save()
+
+        tracking_serializer = TrackingSerializer(data=tracking)
+        if tracking_serializer.is_valid():
+            track = tracking_serializer.save()
+            Accuracy.objects.create(vehicle=temp_vehicle)
+            vehicle_detection.delay(temp_vehicle, track)
+            return True
         
         saps_flag = saps_API(params={"license_plate": data["license_plate"]}, *args, **kwargs)
         data["saps_flagged"] = saps_flag
+
+        # TODO: Move this logic inside the tasks file
 
         # TODO: Check the logic below, what happens when there is a third vehicle with the same plate?
 
