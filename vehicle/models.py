@@ -48,3 +48,19 @@ class MarkedVehicle(models.Model):
     license_plate = models.CharField(max_length=10)
     marked_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='marked_vehicle')
     reason = models.TextField(default=None, blank=True, null=True)
+
+class Accuracy(models.Model):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='accuracy')
+    make_accuracy = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=None)
+    model_accuracy = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=None)
+    color_accuracy = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=None)
+    license_plate_accuracy = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=None)
+    damage_accuracy = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=None)
+
+
+    def __str__(self):
+        return "Accuracies: {}".format(self.vehicle.license_plate)
+
+class DamageModel(models.Model):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='damage_detections')
+    image = models.ImageField(upload_to='damage_detection/%Y/%m/%d/')

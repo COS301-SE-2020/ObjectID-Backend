@@ -7,8 +7,8 @@ from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import permissions, filters
 
-from .models import Vehicle, ImageSpace, MarkedVehicle, Damage
-from .serializers import VehicleSerializer, MarkedVehicleSerializer
+from .models import Vehicle, ImageSpace, MarkedVehicle, Damage, Accuracy
+from .serializers import VehicleSerializer, MarkedVehicleSerializer, AccuracySerializer
 from .utils import check_for_mark, open_cam_rtsp, saps_API, damage_detection
 from tracking.serializers import TrackingSerializer
 from tracking.models import VehicleLog
@@ -299,6 +299,12 @@ class VehicleBase(ActionAPI):
 
         from lpr.lpr import check_image
         import json
+
+
+        # TODO: (Steve) I have created a model and serializer for you to use that stores accuracies. Please make the migrations and implement it here
+        # The related model is called Accuracy and the serializer AccuracySerializer
+        # Then I have also created a new model to store the damage detection model thingy of the vehicle. Please make use of it too (ITS VERY SIMILAR TO THE IMAGESPACE MODEL)
+
 
         camera = Camera.objects.get(owner=request.user, name="Manual")
 
