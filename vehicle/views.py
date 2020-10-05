@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import permissions, filters
 
-from .models import Vehicle, ImageSpace, MarkedVehicle, Damage, Accuracy
+from .models import Vehicle, ImageSpace, MarkedVehicle, Damage, Accuracy, DamageModel
 from .serializers import VehicleSerializer, MarkedVehicleSerializer, AccuracySerializer
 from .utils import check_for_mark, open_cam_rtsp, saps_API, damage_detection
 from tracking.serializers import TrackingSerializer
@@ -706,4 +706,44 @@ class VehicleBase(ActionAPI):
                 "success": False,
                 "message": "Error opening vehicle image"
             }
-       
+
+    @validate_params(["vehicle_id"])
+    def get_vehicles_damage_detection(self, request, params=None, *args, **kwargs):
+        """
+        Get the vehicles detected damages
+        """
+
+        image = DamageModel.objects.filter(vehicle__id=params["vehicle_id"]).last()
+
+        if not image:
+            return{
+                "success": False,
+                "message": "There seems to be no detection image for that vehicle"
+            }
+
+        path = image.image.path
+
+        try:
+            with open(path, 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        except IOError:
+            return {
+                "success": False,
+                "message": "Error opening image"
+            }
+
+    @validate_params(["vehicle_id"])
+    def get_vehicle_accuracy(self, request, params=None, *args, **kwargs):
+
+
+        acc = Accuracy.objects.get(vehicle__id=params["vehicle_id"])
+
+        if not acc:
+            return {
+                "success": False,
+                "message": "No accuracies found for that vehicle id"
+            }
+
+        serializer = AccuracySerializer(acc)
+
+        return serializer.data
