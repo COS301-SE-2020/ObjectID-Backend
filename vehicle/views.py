@@ -747,3 +747,14 @@ class VehicleBase(ActionAPI):
         serializer = AccuracySerializer(acc)
 
         return serializer.data
+
+    def get_latest_damage_detection_image(self, request, params=None, *args, **kwargs):
+        path = "predictions.jpg"
+        try:
+            with open(path, 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        except IOError:
+            return {
+                "success": False,
+                "message": "Error opening vehicle image"
+            }

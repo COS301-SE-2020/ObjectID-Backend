@@ -61,16 +61,20 @@ def make_model_detection(vehicle, image_space):
     bytes_ret = bytes_ret.decode("utf-8").split(":")
     return bytes_ret[1], bytes_ret[0]
 
-def damage_detection(vehicle, image_space):
+def damage_detection(vehicle):
     # TODO: (STEVE) add this please
+    from vehicle.utils import damage_detection
+    bytes_ret = damage_detection(vehicle)
+    return bytes_ret
+
 
 def saps_check(vehicle):
     from vehicle.utils import saps_API
     vehicle.saps_flagged = saps_API(
-        params={
+    params={
             "license_plate": vehicle.license_plate
         },
     )
 
-def duplicate_check(vehicle):
+#def duplicate_check(vehicle):
     # TODO: Move the duplicate checking stuff inside here as well

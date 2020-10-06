@@ -111,6 +111,7 @@ idxs = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"],
 if len(idxs) > 0:
 		# loop over the indexes we are keeping
 	results = []
+	result = []
 	for i in idxs.flatten():
 			# extract the bounding box coordinates
 		(x, y) = (boxes[i][0], boxes[i][1])
@@ -134,7 +135,11 @@ if len(idxs) > 0:
 
 		if i not in results:
 			results.append(i)
-			print(result[0]["color"])
+			if not result:
+				print("N/A")
+			else:
+				print(result[0]["color"])
+			
 
 # print(result[0]['color'])
 
