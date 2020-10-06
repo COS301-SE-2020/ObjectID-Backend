@@ -497,7 +497,7 @@ class VehicleBase(ActionAPI):
         for vehicle in vehicles:
             damage_array = damage_detection(vehicle)
             for damage in damage_array:
-                dmg_obj = Damage(vehicle=vehicle.id, location=damage)
+                dmg_obj = Damage(vehicle=vehicle, location=damage)
                 dmg_obj.save()
 
                 
