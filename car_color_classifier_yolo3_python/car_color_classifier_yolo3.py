@@ -132,6 +132,7 @@ if len(idxs) > 0:
 		text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
 		cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
 				0.5, color, 2)
+		cv2.imwrite("colour.jpg", image)
 
 		if i not in results:
 			results.append(i)

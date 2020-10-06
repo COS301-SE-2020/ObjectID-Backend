@@ -442,7 +442,6 @@ class VehicleBase(ActionAPI):
                             tracking_serializer.save()
                             image_space.vehicle = duplicate_item
                             image_space.save()
-                            return tracking_serializer.data
                     else:
                         duplicate_item.license_plate_duplicate = True
                         duplicate_item.save()
@@ -758,3 +757,26 @@ class VehicleBase(ActionAPI):
                 "success": False,
                 "message": "Error opening vehicle image"
             }
+        
+    def get_latest_colour_detection_image(self, request, params=None, *args, **kwargs):
+        path = "colour.jpg"
+        try:
+            with open(path, 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        except IOError:
+            return {
+                "success": False,
+                "message": "Error opening vehicle image"
+            }
+
+    def get_latest_make_model_detection_image(self, request, params=None, *args, **kwargs):
+        path = "makemodel.jpg"
+        try:
+            with open(path, 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        except IOError:
+            return {
+                "success": False,
+                "message": "Error opening vehicle image"
+            }
+

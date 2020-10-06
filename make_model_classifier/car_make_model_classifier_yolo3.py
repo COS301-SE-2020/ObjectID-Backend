@@ -132,8 +132,8 @@ if len(idxs) > 0:
 						0.6, color, 2)
 		cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
 		text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
-		cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
-			0.5, color, 2)
+		cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+		cv2.imwrite("makemodel.jpg", image)
 
 		if i not in results:
 			results.append(i)
