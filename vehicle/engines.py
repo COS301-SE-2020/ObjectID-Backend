@@ -30,7 +30,7 @@ class VehicleDecisionEngine():
             self.similar_iteration = 0
             return False
 
-        small = minimum_percentages[self.similar_iteration]
+        small = minimum_percentages[str(self.similar_iteration)]
         self.similar_iteration = self.similar_iteration + 1
         similar_qs = self.__get_similar_vehicle_queryset(vehicle)
 
