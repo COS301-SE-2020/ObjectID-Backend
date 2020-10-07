@@ -137,9 +137,9 @@ if len(idxs) > 0:
 		if i not in results:
 			results.append(i)
 			if not result:
-				print("N/A")
+				print("N/A" + ",0.00")
 			else:
-				print(result[0]["color"])
+				print(result[0]["color"] +","+result[0]['prob'])
 			
 
 # print(result[0]['color'])

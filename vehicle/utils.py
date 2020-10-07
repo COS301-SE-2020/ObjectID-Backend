@@ -47,22 +47,45 @@ def saps_API(params=None, *args, **kwargs):
             sapsFlagged = True
         return sapsFlagged
 
-def colour_detection(path):
+def colour_detection(path, vehicle):
 
     from car_color_classifier_yolo3_python.detect import detect
-    color = detect(path)
-    return color
+    colour = detect(path)
 
-def make_model_detection(path):
+    perc = 0.00
+    colour = colour.decode("utf-8")
+    middle = colour.find(",")
+    perc = colour[middle+1:middle+7]
+    perc = float(perc)*100
+
+    acc = Accuracy.objects.get(vehicle__id=vehicle.id)
+    acc.color_accuracy = perc 
+    acc.save()
+
+    return colour
+
+def make_model_detection(path, vehicle):
     from make_model_classifier.detect import detect_make_model
     make_model = detect_make_model(path)
+
+    perc = 0.00
+    make_model = make_model.decode("utf-8")
+    middle = make_model.find(",")
+    perc = make_model[middle+1:middle+7]
+    perc = float(perc)*100
+
+    acc = Accuracy.objects.get(vehicle__id=vehicle.id)
+    acc.make_accuracy = perc
+    acc.model_accuracy = perc 
+    acc.save()
+
     return make_model
 
 def damage_detection(vehicle):
     from darknet_dmg import detect
-    frontPerc = 0
-    sidePerc = 0
-    rearPerc = 0
+    frontPerc = "0"
+    sidePerc = "0"
+    rearPerc = "0"
     res = []
     image = vehicle.images.all().last()
     path = image.image.path
@@ -77,24 +100,29 @@ def damage_detection(vehicle):
 
     if side != -1:
         res.append("Side")
-        sidePerc = output[(front+6):(front+8)]
+        sidePerc = output[(side+6):(side+8)]
     if rear != -1:
         res.append("Rear")
-        rearPerc = output[(front+6):(front+8)]
-    perc = "0"
+        rearPerc = output[(rear+6):(rear+8)]
+    perc = 0.00
 
+    from decimal import Decimal
+    frontPerc = frontPerc + ".00"
+    frontPerc = float(frontPerc)
+
+    rearPerc = rearPerc + ".00"
+    rearPerc = float(rearPerc)
+
+    sidePerc = sidePerc + ".00"
+    sidePerc = float(sidePerc)
+    
     if rearPerc > sidePerc:
         perc = rearPerc
     else:
         perc = sidePerc
 
-    if perc > frontPerc:
-        perc = perc
-    else:
+    if perc < frontPerc:
         perc = frontPerc
-
-    from decimal import Decimal
-    perc = [Decimal(perc.strip(' "'))]
 
     acc = Accuracy.objects.get(vehicle__id=vehicle.id)
     acc.damage_accuracy = perc 

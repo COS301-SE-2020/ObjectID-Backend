@@ -140,7 +140,7 @@ if len(idxs) > 0:
 			if not result:
 				print("N/A : N/A")
 			else:
-				print(result[0]["model"] + ":" + result[0]["make"])
+				print(result[0]["model"] + ":" + result[0]["make"]+","+result[0]['prob'])
 		# if float(result[0]["prob"]) > 0.5: 
 		# 	print("Result {}:".format(i))
 		# 	print(result[0]['model'] + "\n" + result[0]['make'])

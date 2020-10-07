@@ -350,20 +350,21 @@ class VehicleBase(ActionAPI):
                 "license_plate_duplicate": False
             }
 
-            from .utils import colour_detection, make_model_detection
-            bytes_ret = colour_detection(path)
-            bytes_ret = bytes_ret.decode("utf-8").split("\n")
-            data["color"] = bytes_ret[0]
-            bytes_ret = make_model_detection(path)
-            bytes_ret = bytes_ret.decode("utf-8").split(":")
-            data["model"] = bytes_ret[0]
-            data["make"] = bytes_ret[1]
-
             serializer = VehicleSerializer(data=data)
             if serializer.is_valid():
                 vehicle = serializer.save()
                 acc = Accuracy(vehicle=vehicle)
                 acc.save()
+
+                from .utils import colour_detection, make_model_detection
+                bytes_ret = colour_detection(path, vehicle)
+                bytes_ret = bytes_ret.split("\n")
+                data["color"] = bytes_ret[0]
+                bytes_ret = make_model_detection(path, vehicle)
+                bytes_ret = bytes_ret.split(":")
+                data["model"] = bytes_ret[0]
+                data["make"] = bytes_ret[1]
+                
                 tracking["vehicle"] = vehicle
                 tracking_serializer = TrackingSerializer(data=tracking)
                 if tracking_serializer.is_valid():
@@ -411,14 +412,14 @@ class VehicleBase(ActionAPI):
         
         # Do the color detection for the vehicles
         from .utils import colour_detection
-        bytes_ret = colour_detection(path)
-        bytes_ret = bytes_ret.decode("utf-8").split("\n")
+        bytes_ret = colour_detection(path, vehicle)
+        bytes_ret = bytes_ret.split("\n")
         for i, data in enumerate(vehicle_data):
             data["color"] = bytes_ret[i]
 
         # Do the make and model detection for the vehicle(s)
         from .utils import make_model_detection
-        bytes_ret = make_model_detection(path).decode("utf-8").split("\n")
+        bytes_ret = make_model_detection(path, vehicle).split("\n")
         for i, data in enumerate(vehicle_data):
             splitter = bytes_ret[i].split(":")
             data["model"] = splitter[0]
