@@ -1,6 +1,6 @@
-from .models import MarkedVehicle
+from .models import MarkedVehicle, Accuracy
 from tracking.models import VehicleLog
-
+from .serializers import AccuracySerializer
 from django.core.mail import send_mail
 import requests
 
@@ -73,14 +73,33 @@ def damage_detection(vehicle):
     front = output.find("front: ")
     if front != -1:
         res.append("Front")
-        #frontPerc = output[(front+7):(front+9)]
+        frontPerc = output[(front+7):(front+9)]
+
     if side != -1:
         res.append("Side")
-        #sidePerc = output[(front+6):(front+8)]
+        sidePerc = output[(front+6):(front+8)]
     if rear != -1:
         res.append("Rear")
-        #rearPerc = output[(front+6):(front+8)]
-        
+        rearPerc = output[(front+6):(front+8)]
+    perc = "0"
+
+    if rearPerc > sidePerc:
+        perc = rearPerc
+    else:
+        perc = sidePerc
+
+    if perc > frontPerc:
+        perc = perc
+    else:
+        perc = frontPerc
+
+    from decimal import Decimal
+    perc = [Decimal(perc.strip(' "'))]
+
+    acc = Accuracy.objects.get(vehicle__id=vehicle.id)
+    acc.damage_accuracy = perc 
+    acc.save()
+ 
     return res
     #./darknet detector test data/obj.data cfg/yolov4-obj.cfg /mydrive/yolov4/backup/yolov4-obj_3000.weights /mydrive/images/car2.jpg -thresh 0.3
         

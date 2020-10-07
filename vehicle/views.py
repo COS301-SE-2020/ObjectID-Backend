@@ -362,6 +362,8 @@ class VehicleBase(ActionAPI):
             serializer = VehicleSerializer(data=data)
             if serializer.is_valid():
                 vehicle = serializer.save()
+                acc = Accuracy(vehicle=vehicle)
+                acc.save()
                 tracking["vehicle"] = vehicle
                 tracking_serializer = TrackingSerializer(data=tracking)
                 if tracking_serializer.is_valid():
@@ -449,6 +451,8 @@ class VehicleBase(ActionAPI):
                         serializer = VehicleSerializer(data=data)
                         if serializer.is_valid():
                             vehicle = serializer.save()
+                            acc = Accuracy(vehicle=vehicle)
+                            acc.save()
                             tracking["vehicle"] = vehicle.id
                             tracking_serializer = TrackingSerializer(data=tracking)
                             if tracking_serializer.is_valid():
@@ -466,6 +470,8 @@ class VehicleBase(ActionAPI):
 
                 if serializer.is_valid():
                     vehicle = serializer.save()
+                    acc = Accuracy(vehicle=vehicle)
+                    acc.save()
                     tracking["vehicle"] = vehicle.id
                     tracking_serializer = TrackingSerializer(data=tracking)
                     if tracking_serializer.is_valid():
