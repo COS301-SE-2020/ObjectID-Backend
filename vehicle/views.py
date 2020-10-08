@@ -432,7 +432,7 @@ class VehicleBase(ActionAPI):
         # Do the color detection for the vehicles
         from .utils import colour_detection
         if duplicate_check.count() == 1:
-            bytes_ret = colour_detection(path, vehicle)
+            bytes_ret = colour_detection(path, duplicate_obj)
         else:
             bytes_ret = colour_detection(path, duplicate_obj)
 
