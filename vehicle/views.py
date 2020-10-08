@@ -365,7 +365,7 @@ class VehicleBase(ActionAPI):
                 data["model"] = bytes_ret[0]
                 data["make"] = bytes_ret[1]
                 
-                tracking["vehicle"] = vehicle
+                tracking["vehicle"] = vehicle.id
                 tracking_serializer = TrackingSerializer(data=tracking)
                 if tracking_serializer.is_valid():
                     tracking_serializer.save()
@@ -383,6 +383,7 @@ class VehicleBase(ActionAPI):
         image_space_items.append(temp)
         first_iteration = True
         # Init the values for each plate recognized
+        #first time seeing this vehicle
         for item in res:
             plate = item["plate"]
 
