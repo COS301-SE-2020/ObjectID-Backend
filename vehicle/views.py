@@ -839,5 +839,8 @@ class VehicleBase(ActionAPI):
         if type(result) is str:
             return result
         
+        serializer = VehicleSerializer(result)
+
+
         # TODO: Saps email quick stix
-        return result
+        return serializer.data
