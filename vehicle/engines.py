@@ -1,6 +1,6 @@
 import requests
 
-from .models import Accuracy, Vehicle
+from .models import Accuracy, Vehicle, Damage
 from .serializers import VehicleSerializer, AccuracySerializer
 from tracking.serializers import TrackingSerializer
 from .utils import colour_detection, make_model_detection, damage_detection, saps_API
@@ -115,6 +115,12 @@ class VehicleClassificationEngine():
             self.new_vehicle = vehicle_serialzier.save()
             self.image.vehicle = self.new_vehicle
             self.image.save()
+
+            if self.detected_damage_location != "":
+                dmg = Damage(vehicle=self.new_vehicle, location=self.detected_damage_location)
+                dmg.save()
+                # TODO: Steven save the pictures properly
+
             accuracy_data["vehicle"] = self.new_vehicle.id
             accuracy_serializer = AccuracySerializer(data=accuracy_data)
             if accuracy_serializer.is_valid():
@@ -339,6 +345,9 @@ class ScoringEngine():
 
         if a_damage.location == b_damage.location:
             likelihood = likelihood + (self.comparison_weights["damage"] * 100)
+        
+        if not a_damage and not b_damage:
+            likelihood = likelihood + 20
 
         return likelihood
 
@@ -364,6 +373,9 @@ class ScoringEngine():
 
         if a_damage.location == b_damage.location:
             likelihood = likelihood + (self.weights["damage"] * 100)
+
+        if not a_damage and not b_damage:
+            likelihood = likelihood + 20
 
         if a.license_plate.lower() == b.license_plate.lower():
             likelihood = likelihood + (self.weights["license_plate"] * 100)

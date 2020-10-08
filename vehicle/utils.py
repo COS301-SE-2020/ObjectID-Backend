@@ -118,11 +118,17 @@ def damage_detection(path):
     
     if rearPerc > sidePerc:
         perc = rearPerc
+        res = "Rear"
     else:
         perc = sidePerc
+        res = "Side"
 
     if perc < frontPerc:
         perc = frontPerc
+        res = "Front"
+    
+    if perc < 1:
+        res = ""
 
     # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
     # acc.damage_accuracy = perc 
