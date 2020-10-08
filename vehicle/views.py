@@ -425,7 +425,7 @@ class VehicleBase(ActionAPI):
                         "message": "There is something wrong with the detection of the vehicle"
                     }
         else:
-            duplicate_obj = Vehicle.objects.get(license_plate=data["license_plate"])
+            duplicate_obj = Vehicle.objects.filter(license_plate=data["license_plate"]).order_by("-id")[0]
             acc = Accuracy(vehicle=duplicate_obj)
             acc.save()
 
