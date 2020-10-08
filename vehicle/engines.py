@@ -43,9 +43,13 @@ class VehicleClassificationEngine():
 
         # Decode the detections
         color_bytes = self.detected_color.split("\n")
+        middle = color_bytes[0].find(",")
+        color_bytes[0] = color_bytes[0][0:middle]
         self.detected_color = color_bytes[0]
 
         make_model_bytes = self.detected_make_model.split("\n")[0].split(":")
+        middle = make_model_bytes[1].find(",")
+        make_model_bytes[1] = make_model_bytes[1][0:middle]
         self.detected_make = make_model_bytes[1]
         self.detected_model = make_model_bytes[0]
 
