@@ -452,6 +452,11 @@ class VehicleBase(ActionAPI):
             data["model"] = splitter[0]
             data["make"] = splitter[1]
         
+        if duplicate_check.count() == 1:
+            vehicle.make = data["make"]
+            vehicle.model = data["model"]
+            vehicle.color = data["color"]
+
         vehicles = []
         for i, data in enumerate(vehicle_data):
             
