@@ -406,21 +406,47 @@ class VehicleBase(ActionAPI):
 
             vehicle_data.append(data)
 
+
         # Do the saps flag checks
         for data in vehicle_data:
             saps_flag = saps_API(params={"license_plate": data["license_plate"]}, *args, **kwargs)
             data["saps_flagged"] = saps_flag
         
+        duplicate_check = Vehicle.objects.filter(license_plate=data["license_plate"])
+        if duplicate_check.count() == 0:
+            serializer = VehicleSerializer(data=data)
+            if serializer.is_valid():
+                vehicle = serializer.save()
+                acc = Accuracy(vehicle=vehicle)
+                acc.save()
+            else:
+                return {
+                        "success": False,
+                        "message": "There is something wrong with the detection of the vehicle"
+                    }
+        else:
+            duplicate_obj = Vehicle.objects.get(license_plate=data["license_plate"])
+            acc = Accuracy(vehicle=duplicate_obj)
+            acc.save()
+
         # Do the color detection for the vehicles
         from .utils import colour_detection
-        bytes_ret = colour_detection(path, vehicle)
+        if duplicate_check.count() == 1:
+            bytes_ret = colour_detection(path, vehicle)
+        else:
+            bytes_ret = colour_detection(path, duplicate_obj)
+
         bytes_ret = bytes_ret.split("\n")
         for i, data in enumerate(vehicle_data):
             data["color"] = bytes_ret[i]
 
         # Do the make and model detection for the vehicle(s)
         from .utils import make_model_detection
-        bytes_ret = make_model_detection(path, vehicle).split("\n")
+        if duplicate_check.count() == 1:
+            bytes_ret = make_model_detection(path, vehicle).split("\n")
+        else:
+            bytes_ret = make_model_detection(path, duplicate_obj).split("\n")
+
         for i, data in enumerate(vehicle_data):
             splitter = bytes_ret[i].split(":")
             data["model"] = splitter[0]
@@ -431,9 +457,7 @@ class VehicleBase(ActionAPI):
             
             image_space = image_space_items[i]
 
-            duplicate_check = Vehicle.objects.filter(license_plate=data["license_plate"])
-
-            if duplicate_check.count() > 0:
+            if duplicate_check.count() > 1:
 
                 for duplicate_item in duplicate_check:
                     if duplicate_item.make.lower() == data["make"].lower() and\
@@ -468,12 +492,8 @@ class VehicleBase(ActionAPI):
                                 "message": "There is something wrong with the detection of the vehicle"
                             }
             else:
-                serializer = VehicleSerializer(data=data)
 
                 if serializer.is_valid():
-                    vehicle = serializer.save()
-                    acc = Accuracy(vehicle=vehicle)
-                    acc.save()
                     tracking["vehicle"] = vehicle.id
                     tracking_serializer = TrackingSerializer(data=tracking)
                     if tracking_serializer.is_valid():
