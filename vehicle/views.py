@@ -839,7 +839,7 @@ class VehicleBase(ActionAPI):
         if type(result) is str:
             return result
         
-        serializer = VehicleSerializer(result)
+        serializer = VehicleSerializer(result, many=True)
 
 
         # TODO: Saps email quick stix
