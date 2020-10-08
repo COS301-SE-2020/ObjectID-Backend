@@ -1,7 +1,181 @@
+import requests
+
 from .models import Accuracy, Vehicle
-from .serializers import VehicleSerializer
+from .serializers import VehicleSerializer, AccuracySerializer
+from tracking.serializers import TrackingSerializer
+from .utils import colour_detection, make_model_detection, damage_detection, saps_API
 
 from django.db.models import Q
+
+
+
+
+class VehicleClassificationEngine():
+    """
+    Engine to classify vehicles and save them etc
+    """
+
+    vehicle = None
+    image = None
+    tracking_data = None
+    saps_flagged = False
+    license_plate_duplicate = False
+
+    def __init__(self, vehicle, image, tracking_data):
+        self.vehicle = vehicle
+        self.image = image
+        self.tracking_data = tracking_data
+
+    def classify_vehicle(self):
+
+        if self.vehicle is None or self.image is None or self.tracking_data is None:
+            return "Engine paramater not set"
+
+        # Classify the vehicle
+        # Start with color
+        self.detected_color, self.color_accuracy = colour_detection(self.image.image.path)
+        # Make and model
+        self.detected_make_model, self.make_model_accuracy = make_model_detection(self.image.image.path)
+        # Damage
+        self.detected_damage_location, self.damage_accuracy = damage_detection(self.image.image.path)
+        # License plate
+        self.detected_plate = self.__get_plate_information()
+
+        # Decode the detections
+        color_bytes = self.detected_color.split("\n")
+        self.detected_color = color_bytes[0]
+
+        make_model_bytes = self.detected_make_model.split("\n")[0].split(":")
+        self.detected_make = make_model_bytes[1]
+        self.detected_model = make_model_bytes[0]
+
+        # If the license plate is not detected just save the new vehicle
+        # Otherwise do comparison checks to see if we have the same vehicle or save a new vehicle
+
+        if self.detected_plate == 1:
+            return self.__save_vehicle("")
+            
+        duplicate_qs = self.__check_for_duplication_plates()
+
+        if duplicate_qs is False:
+            return self.__save_vehicle(self.detected_plate)
+        
+        decision_engine = VehicleDecisionEngine()
+        decision_qs = decision_engine.get_similar_vehicles()
+
+        for item in decision_qs:
+            if item["similarity_score"] == 100:
+                return self.__track_vehicle(item["vehicle_id"])
+
+        decision_qs = decision_qs.filter(license_plate__iexact=self.detected_plate)
+        if decision_qs.count() == 0:
+            return self.__save_vehicle(self.detected_plate)
+        
+        for item in decision_qs():
+            item.license_plate_duplicate = True
+            item.save()
+        
+        self.license_plate_duplicate = True
+        return self.__save_vehicle(self.detected_plate)
+
+    
+    def __track_vehicle(self, vehicle_id):
+        self.tracking_data["vehicle"] = vehicle_id
+        tracking_serializer = TrackingSerializer(data=self.tracking_data)
+        if tracking_serializer.is_valid():
+            track = tracking_serializer.save()
+            self.image.vehicle = track.vehicle
+            self.image.save()
+            self.vehicle.delete()
+            return "Vehicle Tracked"
+        else:
+            return "Error tracking vehicle"
+
+    def __save_vehicle(self, temp_plate):
+        vehicle_data = {
+            "license_plate": temp_plate,
+            "make": self.detected_make,
+            "model": self.detected_model,
+            "color": self.detected_color,
+            "saps_flagged": self.saps_flagged,
+            "license_plate_duplicate": self.license_plate_duplicate
+        }
+
+        accuracy_data = {
+            "vehicle": None,
+            "make_accuracy": self.make_model_accuracy,
+            "model_accuracy": self.make_model_accuracy,
+            "color_accuracy": self.color_accuracy,
+            "license_plate_accuracy": 0.00,
+            "damage_accuracy": self.damage_accuracy
+        }
+
+        vehicle_serialzier = VehicleSerializer(data=vehicle_data)
+        if vehicle_serialzier.is_valid():
+            self.new_vehicle = vehicle_serialzier.save()
+            self.image.vehicle = self.new_vehicle
+            self.image.save()
+            accuracy_data["vehicle"] = self.new_vehicle.id
+            accuracy_serializer = AccuracySerializer(data=accuracy_data)
+            if accuracy_serializer.is_valid():
+                accuracy_serializer.save()
+                self.tracking_data["vehicle"] = self.new_vehicle.id
+                tracking_serializer = TrackingSerializer(data=self.tracking_data)
+                if tracking_serializer.is_valid():
+                    tracking_serializer.save()
+                    return self.new_vehicle
+                else:
+                    return "Error with tracking information"
+            else:
+                return "Error with accuracy information"
+        else:
+            return "Error with vehicle information"
+
+
+    def __get_plate_information(self):
+        
+        result = self.__recognize_plate_with_api()
+        return result
+
+    def __recognize_plate_with_api(self):
+        regions = ["za"]
+
+        path = self.image.image.path
+
+        with open(path, 'rb') as fp:
+            response = requests.post(
+                'https://api.platerecognizer.com/v1/plate-reader/',
+                data=dict(regions=regions),  # Optional
+                files=dict(upload=fp),
+                headers={'Authorization': 'token 8e744c1226777aa96d25e06807b69cbfc03f4c72'})
+            res = response.json()
+        if res.get("error", None):
+            return False
+        res = res["results"]
+        if len(res) == 0:
+            return 1
+        return res[0]["plate"]
+
+    def __check_for_duplication_plates(self):
+        qs = Vehicle.objects.filter(license_plate__iexact=self.vehicle.license_plate)
+
+        if qs.count() == 0:
+            return False
+        return qs
+
+    def __check_saps(self, license_plate):
+        self.saps_flagged = saps_API(
+            params={
+                "license_plate": license_plate
+            }
+        )
+        return True
+
+    def should_notify_saps(self):
+        if self.saps_flagged:
+            return True
+        else:
+            return False
 
 
 
@@ -51,6 +225,9 @@ class VehicleDecisionEngine():
                 })
 
         return results
+
+    def obtain_private_qs(self, vehicle):
+        return self.__get_similar_vehicle_queryset(vehicle)
 
     def __get_similar_vehicle_queryset(self, vehicle):
         """

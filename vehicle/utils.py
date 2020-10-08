@@ -47,7 +47,7 @@ def saps_API(params=None, *args, **kwargs):
             sapsFlagged = True
         return sapsFlagged
 
-def colour_detection(path, vehicle):
+def colour_detection(path):
 
     from car_color_classifier_yolo3_python.detect import detect
     colour = detect(path)
@@ -58,13 +58,13 @@ def colour_detection(path, vehicle):
     perc = colour[middle+1:middle+7]
     perc = float(perc)*100
 
-    acc = Accuracy.objects.get(vehicle__id=vehicle.id)
-    acc.color_accuracy = perc 
-    acc.save()
+    # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
+    # acc.color_accuracy = perc 
+    # acc.save()
 
-    return colour
+    return colour, perc
 
-def make_model_detection(path, vehicle):
+def make_model_detection(path):
     from make_model_classifier.detect import detect_make_model
     make_model = detect_make_model(path)
 
@@ -74,21 +74,21 @@ def make_model_detection(path, vehicle):
     perc = make_model[middle+1:middle+7]
     perc = float(perc)*100
 
-    acc = Accuracy.objects.get(vehicle__id=vehicle.id)
-    acc.make_accuracy = perc
-    acc.model_accuracy = perc 
-    acc.save()
+    # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
+    # acc.make_accuracy = perc
+    # acc.model_accuracy = perc 
+    # acc.save()
 
-    return make_model
+    return make_model, perc
 
-def damage_detection(vehicle):
+def damage_detection(path):
     from darknet_dmg import detect
     frontPerc = "0"
     sidePerc = "0"
     rearPerc = "0"
     res = []
-    image = vehicle.images.all().last()
-    path = image.image.path
+    # image = vehicle.images.all().last()
+    # path = image.image.path
     output = detect.detect(path)
     output = output.decode("utf-8")
     side = output.find("side: ")
@@ -124,10 +124,10 @@ def damage_detection(vehicle):
     if perc < frontPerc:
         perc = frontPerc
 
-    acc = Accuracy.objects.get(vehicle__id=vehicle.id)
-    acc.damage_accuracy = perc 
-    acc.save()
+    # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
+    # acc.damage_accuracy = perc 
+    # acc.save()
  
-    return res
+    return res, perc
     #./darknet detector test data/obj.data cfg/yolov4-obj.cfg /mydrive/yolov4/backup/yolov4-obj_3000.weights /mydrive/images/car2.jpg -thresh 0.3
         

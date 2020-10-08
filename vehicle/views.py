@@ -425,16 +425,16 @@ class VehicleBase(ActionAPI):
                         "message": "There is something wrong with the detection of the vehicle"
                     }
         else:
-            duplicate_obj = Vehicle.objects.filter(license_plate=data["license_plate"]).order_by("-id")[0]
-            acc = Accuracy(vehicle=duplicate_obj)
+            vehicle = Vehicle.objects.filter(license_plate=data["license_plate"]).order_by("-id")[0]
+            acc = Accuracy(vehicle=vehicle)
             acc.save()
 
         # Do the color detection for the vehicles
         from .utils import colour_detection
         if duplicate_check.count() == 1:
-            bytes_ret = colour_detection(path, duplicate_obj)
+            bytes_ret = colour_detection(path, vehicle)
         else:
-            bytes_ret = colour_detection(path, duplicate_obj)
+            bytes_ret = colour_detection(path, vehicle)
 
         bytes_ret = bytes_ret.split("\n")
         for i, data in enumerate(vehicle_data):
@@ -445,7 +445,7 @@ class VehicleBase(ActionAPI):
         if duplicate_check.count() == 1:
             bytes_ret = make_model_detection(path, vehicle).split("\n")
         else:
-            bytes_ret = make_model_detection(path, duplicate_obj).split("\n")
+            bytes_ret = make_model_detection(path, vehicle).split("\n")
 
         for i, data in enumerate(vehicle_data):
             splitter = bytes_ret[i].split(":")
@@ -813,3 +813,31 @@ class VehicleBase(ActionAPI):
                 "message": "Error opening vehicle image"
             }
 
+
+    def file_recognize_two(self, request, params=None, *args, **kwargs):
+
+        from .engines import VehicleClassificationEngine
+
+        camera = Camera.objects.get(owner=request.user, name="Manual")
+        vehicle = Vehicle()
+        temp = ImageSpace(image=params['file'])
+        temp.save()
+        path = temp.image.path
+
+        tracking = {
+            "vehicle": None,
+            "date": datetime.now(),
+            "lat": float(params.get("lat", 00.000000)),
+            "long": float(params.get("long", 00.000000)),
+            "camera": camera.id
+        }
+
+
+        engine = VehicleClassificationEngine(vehicle, temp, tracking)
+        result = engine.classify_vehicle()
+
+        if type(result) is str:
+            return result
+        
+        # TODO: Saps email quick stix
+        return result
