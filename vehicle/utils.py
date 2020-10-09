@@ -56,6 +56,7 @@ def colour_detection(path):
     colour = colour.decode("utf-8")
     middle = colour.find(",")
     perc = colour[middle+1:middle+7]
+    print(perc)
     perc = float(perc)*100
 
     # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
