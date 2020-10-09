@@ -128,6 +128,7 @@ class VehicleClassificationEngine():
             accuracy_data["vehicle"] = self.new_vehicle.id
             accuracy_data["make_accuracy"] = float("{:.2f}".format(accuracy_data["make_accuracy"]))
             accuracy_data["model_accuracy"] = float("{:.2f}".format(accuracy_data["model_accuracy"]))
+            accuracy_data["color_accuracy"] = float("{:.2f}".format(accuracy_data["color_accuracy"]))
           
             accuracy_serializer = AccuracySerializer(data=accuracy_data)
             if accuracy_serializer.is_valid():
