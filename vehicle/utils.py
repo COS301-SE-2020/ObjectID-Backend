@@ -56,7 +56,9 @@ def colour_detection(path):
     colour = colour.decode("utf-8")
     middle = colour.find(",")
     perc = colour[middle+1:middle+7]
-    print(perc)
+    failed = colour.find("0.00")
+    if failed != -1:
+        perc = perc[0:4]
     perc = float(perc)*100
 
     # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
@@ -73,6 +75,9 @@ def make_model_detection(path):
     make_model = make_model.decode("utf-8")
     middle = make_model.find(",")
     perc = make_model[middle+1:middle+7]
+    failed = make_model.find("0.00")
+    if failed != -1:
+        perc = perc[0:4]
     perc = float(perc)*100
 
     # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
