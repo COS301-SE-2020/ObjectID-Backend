@@ -135,7 +135,7 @@ class VehicleClassificationEngine():
                 self.tracking_data["vehicle"] = self.new_vehicle.id
                 tracking_serializer = TrackingSerializer(data=self.tracking_data)
                 if tracking_serializer.is_valid():
-                    tracking_serializer.save()
+                    tracking_serializer.save() 
                     return self.new_vehicle
                 else:
                     return "Error with tracking information"

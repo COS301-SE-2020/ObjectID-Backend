@@ -138,7 +138,7 @@ if len(idxs) > 0:
 		if i not in results:
 			results.append(i)
 			if not result:
-				print("N/A : N/A")
+				print("N/A : N/A,0.00")
 			else:
 				print(result[0]["model"] + ":" + result[0]["make"]+","+result[0]['prob'])
 		# if float(result[0]["prob"]) > 0.5: 
