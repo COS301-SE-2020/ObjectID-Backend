@@ -10,7 +10,7 @@ from rest_framework import permissions, filters
 from .models import Vehicle, ImageSpace, MarkedVehicle, Damage, Accuracy, DamageModel
 from .serializers import VehicleSerializer, MarkedVehicleSerializer, AccuracySerializer
 from .utils import check_for_mark, open_cam_rtsp, saps_API, damage_detection
-from tracking.serializers import TrackingSerializer
+from tracking.serializers import TrackingSerializer, TrackingReturnSerializer
 from tracking.models import VehicleLog
 from tools.viewsets import ActionAPI, validate_params
 from camera.models import Camera
@@ -683,7 +683,7 @@ class VehicleBase(ActionAPI):
         payload = []
         for vehicle in vehicles:
             tracking_data = vehicle.tracking.all()
-            tracking_serializer = TrackingSerializer(tracking_data, many=True)
+            tracking_serializer = TrackingReturnSerializer(tracking_data, many=True)
             temp_data = {
                 "vehicle_id": vehicle.id,
                 "license_plate": vehicle.license_plate,
