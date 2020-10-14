@@ -844,3 +844,14 @@ class VehicleBase(ActionAPI):
 
         # TODO: Saps email quick stix
         return serializer.data
+
+    def test_email(self, request, params=None, *args, **kwargs):
+        from email_engine import EmailEngine
+
+        test_vehicle = Vehicle.objects.all().latest("id")
+        test_address = "stephendups@gmail.com"
+
+        engine = EmailEngine()
+        engine.send_flagged_notification(test_address, test_vehicle)
+
+        return "sent"
