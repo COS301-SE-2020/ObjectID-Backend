@@ -49,8 +49,12 @@ class VehicleClassificationEngine():
         self.detected_color = color_bytes[0]
 
         make_model_bytes = self.detected_make_model.split("\n")[0].split(":")
-        middle = make_model_bytes[1].find(",")
-        make_model_bytes[1] = make_model_bytes[1][0:middle]
+        if make_model_bytes[0] == "":
+            make_model_bytes[0] = "N/A"
+            make_model_bytes.append("N/A")
+        else:
+            middle = make_model_bytes[1].find(",")
+            make_model_bytes[1] = make_model_bytes[1][0:middle]
         self.detected_make = make_model_bytes[1]
         self.detected_model = make_model_bytes[0]
 
