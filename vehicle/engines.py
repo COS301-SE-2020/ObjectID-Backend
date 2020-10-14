@@ -107,10 +107,10 @@ class VehicleClassificationEngine():
 
         try:
             check_vehicle = Vehicle.objects.get(
-                license_plate=self.detected_plate,
-                make=self.detected_make,
-                model=self.detected_model,
-                color=self.detected_color
+                license_plate__iexact=self.detected_plate,
+                make__iexact=self.detected_make,
+                model__iexact=self.detected_model,
+                color__iexact=self.detected_color
             )
         except Vehicle.DoesNotExist:
             return False
