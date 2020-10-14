@@ -58,7 +58,11 @@ class VehicleClassificationEngine():
 
         if self.detected_plate == 1:
             return self.__save_vehicle("")
-            
+        
+        perfect_check = self.__check_for_perfect_match()
+        if perfect_check is not False:
+            return perfect_check
+
         duplicate_qs = self.__check_for_duplication_plates()
 
         if duplicate_qs is False:
@@ -94,6 +98,30 @@ class VehicleClassificationEngine():
             return "Vehicle Tracked"
         else:
             return "Error tracking vehicle"
+
+    def __check_for_perfect_match(self):
+        """
+        Checks for a perfect match and if found then tracks the vehicle and then returns True
+        Returns false on no perfect match
+        """
+
+        try:
+            check_vehicle = Vehicle.objects.get(
+                license_plate=self.detected_plate,
+                make=self.detected_make,
+                model=self.detected_model,
+                color=self.detected_color
+            )
+        except Vehicle.DoesNotExist:
+            return False
+
+        self.tracking_data["vehicle"] = check_vehicle.id
+        tracking_serializer = TrackingSerializer(data=self.tracking_data)
+        if tracking_serializer.is_valid():
+            tracking_serializer.save()
+            return Vehicle.objects.get(license_plate=self.detected_plate)
+        else:
+            return False
 
     def __save_vehicle(self, temp_plate):
         vehicle_data = {
