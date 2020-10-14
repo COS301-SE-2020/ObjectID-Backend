@@ -35,7 +35,7 @@ USE_I18N = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#use-l10n
 USE_L10N = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
-USE_TZ = True
+USE_TZ = False
 # https://docs.djangoproject.com/en/dev/ref/settings/#locale-paths
 LOCALE_PATHS = [ROOT_DIR.path("locale")]
 
@@ -45,13 +45,12 @@ LOCALE_PATHS = [ROOT_DIR.path("locale")]
 
 DATABASES = {
     'default': {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": "objectid",
         "USER": "postgres",
         "PASSWORD": "admin",
-        "HOST": "db",
+        "HOST": "127.0.0.1",
         "PORT": "5432",
-        "CONN_MAX_AGE": None,
     }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
