@@ -62,7 +62,7 @@ class VehicleClassificationEngine():
         
         perfect_check = self.__check_for_perfect_match()
         if perfect_check is not False:
-            return perfect_check
+            return self.__track_vehicle(perfect_check.id)
 
         duplicate_qs = self.__check_for_duplication_plates()
 
@@ -95,12 +95,12 @@ class VehicleClassificationEngine():
         self.__check_saps(self.detected_plate)
         self.__check_marked(self.detected_plate)
 
-        vehicle = Vehicle.objects.filter(license_plate=self.detected_plate)
-        for v in vehicle:
-            if self.saps_flagged:
-                email_engine.send_saps_flag_notification(self.to_address, v)
-            v.saps_flagged = self.saps_flagged
-            v.save()
+        vehicle = Vehicle.objects.get(id=vehicle_id)
+        # for v in vehicle:
+        if self.saps_flagged:
+            email_engine.send_saps_flag_notification(self.to_address, vehicle)
+        vehicle.saps_flagged = self.saps_flagged
+        vehicle.save()
 
         if self.marked:
             for address in self.marked_address:
@@ -112,8 +112,8 @@ class VehicleClassificationEngine():
             track = tracking_serializer.save()
             self.image.vehicle = track.vehicle
             self.image.save()
-            self.vehicle.delete()
-            return "Vehicle Tracked"
+            #self.vehicle.delete()
+            return vehicle
         else:
             return "Error tracking vehicle"
 
