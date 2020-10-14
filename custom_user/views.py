@@ -19,6 +19,7 @@ from camera.serializers import (
 )
 
 from custom_user import send_email
+from email_engine import EmailEngine
 
 class CustomUserBase(ActionAPI):
 
@@ -60,6 +61,21 @@ class CustomUserBase(ActionAPI):
                 name="Manual"
             )
 
+            email_engine = EmailEngine()
+
+            try:
+                email_engine.send_registration_email(params["email"])
+                return {
+                    "success": True,
+                    "message": "Confirmation email sent"
+                }
+            except Exception as e:
+                return {
+                    "success": True,
+                    "payload": {
+                        "error": "User successfully registered but there was an error sending the confirmation email"
+                    }
+                }
             return {"success": True}
         else:
             return {
