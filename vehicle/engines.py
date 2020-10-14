@@ -1,6 +1,6 @@
 import requests
 
-from .models import Accuracy, Vehicle, Damage
+from .models import Accuracy, Vehicle, Damage, MarkedVehicle
 from .serializers import VehicleSerializer, AccuracySerializer
 from tracking.serializers import TrackingSerializer
 from .utils import colour_detection, make_model_detection, damage_detection, saps_API
@@ -124,6 +124,10 @@ class VehicleClassificationEngine():
             return False
 
     def __save_vehicle(self, temp_plate):
+        from email_engine import EmailEngine
+        email_engine = EmailEngine()
+        self.__check_saps(temp_plate)
+        self.__check_marked(temp_plate)
         vehicle_data = {
             "license_plate": temp_plate,
             "make": self.detected_make,
@@ -165,6 +169,12 @@ class VehicleClassificationEngine():
                 tracking_serializer = TrackingSerializer(data=self.tracking_data)
                 if tracking_serializer.is_valid():
                     tracking_serializer.save() 
+                    if self.new_vehicle.license_plate != "":
+                        if self.marked:
+                            for email in self.marked_address:
+                                email_engine.send_flagged_notification(email, self.new_vehicle)
+                        if self.saps_flagged:
+                            email_engine.send_saps_flag_notification(self.to_address, self.new_vehicle)
                     return self.new_vehicle
                 else:
                     return "Error with tracking information"
@@ -211,7 +221,18 @@ class VehicleClassificationEngine():
                 "license_plate": license_plate
             }
         )
-        return True
+        return self.saps_flagged
+
+    def __check_marked(self, license_plate):
+        self.marked = False
+        
+        obj = MarkedVehicle.objects.filter(license_plate=license_plate)
+        if obj.count() > 0:
+            self.marked_address = []
+            for item in obj:
+                self.marked_address.append(item.marked_by.email)
+            self.marked = True
+        return self.marked
 
     def should_notify_saps(self):
         if self.saps_flagged:
