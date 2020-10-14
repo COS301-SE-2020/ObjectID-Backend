@@ -852,6 +852,6 @@ class VehicleBase(ActionAPI):
         test_address = "stephendups@gmail.com"
 
         engine = EmailEngine()
-        engine.send_flagged_notification(test_address, test_vehicle)
+        engine.send_saps_flag_notification(test_address, test_vehicle)
 
         return "sent"

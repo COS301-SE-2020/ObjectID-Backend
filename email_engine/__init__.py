@@ -52,7 +52,7 @@ class EmailEngine():
         if not address or not vehicle:
             return False
 
-        log = Vehicle.tracking.last("id")
+        log = vehicle.tracking.all().order_by("-id")[0]
         mark = MarkedVehicle.objects.get(license_plate__iexact=vehicle.license_plate)
 
         subject = "ObjectID: Flagged Vehicle Spotted"
@@ -73,7 +73,7 @@ class EmailEngine():
         if not address or not vehicle:
             return False
 
-        log = Vehicle.tracking.last("id")
+        log = vehicle.tracking.last()
 
         subject = "ObjectID: SAPS Flagged Vehicle Spotted"
         message = "A vehicle that has been flagged by saps as either stolen or involved in crime has been spotted.\n"\
