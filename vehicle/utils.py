@@ -59,6 +59,8 @@ def colour_detection(path):
     failed = colour.find("0.00")
     if failed != -1:
         perc = perc[0:4]
+    if perc == "":
+        perc = "0.00"
     perc = float(perc)*100
 
     # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
@@ -78,6 +80,8 @@ def make_model_detection(path):
     failed = make_model.find("0.00")
     if failed != -1:
         perc = perc[0:4]
+    if perc == "":
+        perc = "0.00"
     perc = float(perc)*100
 
     # acc = Accuracy.objects.get(vehicle__id=vehicle.id)
