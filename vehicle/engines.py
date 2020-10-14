@@ -64,26 +64,14 @@ class VehicleClassificationEngine():
         if perfect_check is not False:
             return self.__track_vehicle(perfect_check.id)
 
-        duplicate_qs = self.__check_for_duplication_plates()
+        duplicate_qs = self.__check_for_duplication_plates(self.detected_plate)
 
         if duplicate_qs is False:
             return self.__save_vehicle(self.detected_plate)
         
-        decision_engine = VehicleDecisionEngine()
-        decision_qs = decision_engine.get_similar_vehicles()
-
-        for item in decision_qs:
-            if item["similarity_score"] == 100:
-                return self.__track_vehicle(item["vehicle_id"])
-
-        decision_qs = decision_qs.filter(license_plate__iexact=self.detected_plate)
-        if decision_qs.count() == 0:
-            return self.__save_vehicle(self.detected_plate)
-        
-        for item in decision_qs():
-            item.license_plate_duplicate = True
-            item.save()
-        
+        for vehicle in duplicate_qs:
+            vehicle.license_plate_duplicate = True
+            vehicle.save()
         self.license_plate_duplicate = True
         return self.__save_vehicle(self.detected_plate)
 
@@ -128,7 +116,8 @@ class VehicleClassificationEngine():
                 license_plate__iexact=self.detected_plate,
                 make__iexact=self.detected_make,
                 model__iexact=self.detected_model,
-                color__iexact=self.detected_color
+                color__iexact=self.detected_color,
+                license_plate_duplicate=False,
             )
         except Vehicle.DoesNotExist:
             return False
@@ -137,7 +126,7 @@ class VehicleClassificationEngine():
         tracking_serializer = TrackingSerializer(data=self.tracking_data)
         if tracking_serializer.is_valid():
             tracking_serializer.save()
-            return Vehicle.objects.get(license_plate=self.detected_plate)
+            return check_vehicle
         else:
             return False
 
@@ -226,12 +215,12 @@ class VehicleClassificationEngine():
             return 1
         return res[0]["plate"]
 
-    def __check_for_duplication_plates(self):
-        qs = Vehicle.objects.filter(license_plate__iexact=self.vehicle.license_plate)
+    def __check_for_duplication_plates(self, license_plate):
+        qs = Vehicle.objects.filter(license_plate__iexact=license_plate)
 
-        if qs.count() == 0:
-            return False
-        return qs
+        if qs.count() > 0:
+            return qs
+        return False
 
     def __check_saps(self, license_plate):
         self.saps_flagged = saps_API(
