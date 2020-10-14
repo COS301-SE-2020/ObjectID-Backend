@@ -833,7 +833,7 @@ class VehicleBase(ActionAPI):
         }
 
 
-        engine = VehicleClassificationEngine(vehicle, temp, tracking)
+        engine = VehicleClassificationEngine(vehicle, temp, tracking, to_address=request.user.email)
         result = engine.classify_vehicle()
 
         if type(result) is str:

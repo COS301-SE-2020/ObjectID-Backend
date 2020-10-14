@@ -21,10 +21,11 @@ class VehicleClassificationEngine():
     saps_flagged = False
     license_plate_duplicate = False
 
-    def __init__(self, vehicle, image, tracking_data):
+    def __init__(self, vehicle, image, tracking_data, to_address=None):
         self.vehicle = vehicle
         self.image = image
         self.tracking_data = tracking_data
+        self.to_address = to_address
 
     def classify_vehicle(self):
 
@@ -88,6 +89,23 @@ class VehicleClassificationEngine():
 
     
     def __track_vehicle(self, vehicle_id):
+        from email_engine import EmailEngine
+        email_engine = EmailEngine()
+
+        self.__check_saps(self.detected_plate)
+        self.__check_marked(self.detected_plate)
+
+        vehicle = Vehicle.objects.filter(license_plate=self.detected_plate)
+        for v in vehicle:
+            if self.saps_flagged:
+                email_engine.send_saps_flag_notification(self.to_address, v)
+            v.saps_flagged = self.saps_flagged
+            v.save()
+
+        if self.marked:
+            for address in self.marked_address:
+                email_engine.send_flagged_notification(address, vehicle[0])
+
         self.tracking_data["vehicle"] = vehicle_id
         tracking_serializer = TrackingSerializer(data=self.tracking_data)
         if tracking_serializer.is_valid():
