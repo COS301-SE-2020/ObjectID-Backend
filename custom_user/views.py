@@ -27,6 +27,15 @@ class CustomUserBase(ActionAPI):
 
     @validate_params(['email', 'password1', 'username', 'password2'])
     def register_user(self, request, params=None, *args, **kwargs):
+
+
+        user_duplicate_check = get_user_model().objects.filter(email=params["email"])
+        if user_duplicate_check.count() > 0:
+            return {
+                "success": False,
+                "message": "A user with that email already exists"
+            }
+
         form = RegisterForm(params)
 
         if form.is_valid():
