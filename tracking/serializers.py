@@ -15,7 +15,7 @@ class TrackingReturnSerializer(serializers.ModelSerializer):
     def get_date(self, obj):
         temp_date = obj.date
 
-        return datetime.strftime(temp_date, "%Y-%M-%d - %H-%m")
+        return datetime.strftime(temp_date, "%Y-%m-%d - %H:%M:%S")
 
 
     class Meta:
