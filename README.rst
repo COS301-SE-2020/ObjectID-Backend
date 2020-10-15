@@ -14,9 +14,13 @@ ObjectID
 Team Members
 ------------
 Stephen du Plesis: stephendups@gmail.com
+
 Johannes Wolmarans: u17043540@tuks.co.za
+
 Luke Greenberg: lukegreen.pc@gmail.com
+
 Zoe Schnetler: zoe.schnetler@gmail.com
+
 Thembinkosi Isaac Mtsweni: u16205457@tuks.co.za
 
 Settings
